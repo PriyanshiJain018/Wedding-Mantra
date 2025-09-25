@@ -11,6 +11,7 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <meta name="apple-mobile-web-app-title" content="Wedding Mantra">
+    <link rel="manifest" href="data:application/json;base64,ewogICJuYW1lIjogIldlZGRpbmcgTWFudHJhIiwKICAic2hvcnRfbmFtZSI6ICJXZWRKAW5nIiwKICAic3RhcnRfdXJsIjogIi4iLAogICJkaXNwbGF5IjogInN0YW5kYWxvbmUiLAogICJiYWNrZ3JvdW5kX2NvbG9yIjogIiNGRkY1RTYiLAogICJ0aGVtZV9jb2xvciI6ICIjRkY2QjM1IiwKICAib3JpZW50YXRpb24iOiAicG9ydHJhaXQiLAogICJpY29ucyI6IFsKICAgIHsKICAgICAgInNyYyI6ICJkYXRhOmltYWdlL3N2Zyt4bWwsPHN2ZyB4bWxucz0naHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmcnIHZpZXdCb3g9JzAgMCAxMDAgMTAwJz48dGV4dCB5PScwLjllbScgZm9udC1zaXplPSc5MCc+8J+RsDwvdGV4dD48L3N2Zz4iLAogICAgICAic2l6ZXMiOiAiMTkyeDE5MiIsCiAgICAgICJ0eXBlIjogImltYWdlL3N2Zyt4bWwiCiAgICB9CiAgXQp9">
     <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='0.9em' font-size='90'>👰</text></svg>">
     
     <style>
@@ -133,6 +134,280 @@
         @keyframes float {
             0%, 100% { transform: translateY(0); }
             50% { transform: translateY(-5px); }
+        }
+
+        /* Search Bar */
+        .search-filter-bar {
+            background: white;
+            padding: 20px;
+            border-radius: 20px;
+            box-shadow: var(--shadow);
+            margin: 20px 0;
+            display: none;
+        }
+
+        .search-filter-bar.active {
+            display: block;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 12px 20px;
+            border: 2px solid #E0E0E0;
+            border-radius: 25px;
+            font-size: 1rem;
+            margin-bottom: 15px;
+        }
+
+        .search-input:focus {
+            outline: none;
+            border-color: #FF6B35;
+            box-shadow: 0 0 0 4px rgba(255, 107, 53, 0.1);
+        }
+
+        .filter-buttons {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .filter-btn {
+            padding: 8px 16px;
+            border: 2px solid #E0E0E0;
+            background: white;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 0.9rem;
+        }
+
+        .filter-btn.active {
+            background: var(--primary);
+            color: white;
+            border-color: transparent;
+        }
+
+        /* Timeline View */
+        .timeline-view {
+            display: none;
+            padding: 30px 0;
+        }
+
+        .timeline-view.active {
+            display: block;
+        }
+
+        .timeline {
+            position: relative;
+            padding: 20px 0;
+        }
+
+        .timeline::before {
+            content: '';
+            position: absolute;
+            left: 50%;
+            top: 0;
+            bottom: 0;
+            width: 3px;
+            background: linear-gradient(180deg, #FF6B35 0%, #E91E63 100%);
+            transform: translateX(-50%);
+        }
+
+        .timeline-item {
+            position: relative;
+            margin: 30px 0;
+            display: flex;
+            align-items: center;
+        }
+
+        .timeline-item:nth-child(even) {
+            flex-direction: row-reverse;
+        }
+
+        .timeline-content {
+            flex: 1;
+            padding: 20px;
+            background: white;
+            border-radius: 20px;
+            box-shadow: var(--shadow);
+            margin: 0 30px;
+            position: relative;
+            animation: slideInUp 0.5s ease;
+        }
+
+        .timeline-dot {
+            width: 20px;
+            height: 20px;
+            background: white;
+            border: 4px solid #FF6B35;
+            border-radius: 50%;
+            position: absolute;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 1;
+        }
+
+        .timeline-date {
+            font-weight: 600;
+            color: #FF6B35;
+            margin-bottom: 10px;
+            font-size: 0.9rem;
+        }
+
+        .timeline-title {
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 5px;
+        }
+
+        .countdown {
+            display: inline-block;
+            padding: 6px 12px;
+            background: #FFF3E0;
+            color: #E65100;
+            border-radius: 15px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            margin-top: 10px;
+        }
+
+        .countdown.past {
+            background: #E8F5E9;
+            color: #2E7D32;
+        }
+
+        /* Reminders */
+        .reminder-badge {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            background: linear-gradient(135deg, #FF6B35 0%, #F7931E 100%);
+            color: white;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            cursor: pointer;
+            box-shadow: 0 4px 20px rgba(255, 107, 53, 0.4);
+            z-index: 100;
+            animation: pulse 2s infinite;
+        }
+
+        .reminder-badge.has-notifications::after {
+            content: '';
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            width: 15px;
+            height: 15px;
+            background: #f44336;
+            border-radius: 50%;
+            border: 2px solid white;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        .reminder-panel {
+            position: fixed;
+            bottom: 100px;
+            right: 30px;
+            width: 350px;
+            max-height: 500px;
+            background: white;
+            border-radius: 20px;
+            box-shadow: var(--shadow-hover);
+            padding: 20px;
+            display: none;
+            overflow-y: auto;
+            z-index: 99;
+        }
+
+        .reminder-panel.active {
+            display: block;
+            animation: slideInUp 0.3s ease;
+        }
+
+        .reminder-item {
+            padding: 15px;
+            background: var(--bg-light);
+            border-radius: 12px;
+            margin-bottom: 10px;
+            border-left: 4px solid;
+        }
+
+        .reminder-item.urgent {
+            border-left-color: #f44336;
+            background: #FFEBEE;
+        }
+
+        .reminder-item.warning {
+            border-left-color: #FF9800;
+            background: #FFF3E0;
+        }
+
+        .reminder-item.info {
+            border-left-color: #2196F3;
+            background: #E3F2FD;
+        }
+
+        /* Export Options */
+        .export-menu {
+            background: white;
+            padding: 20px;
+            border-radius: 20px;
+            box-shadow: var(--shadow);
+            margin-top: 20px;
+            display: none;
+        }
+
+        .export-menu.active {
+            display: block;
+        }
+
+        .export-options {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 15px;
+        }
+
+        .export-option {
+            padding: 15px;
+            background: var(--bg-light);
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: center;
+            border: 2px solid transparent;
+        }
+
+        .export-option:hover {
+            transform: translateY(-2px);
+            border-color: #FF6B35;
+            box-shadow: var(--shadow);
+        }
+
+        .export-option-icon {
+            font-size: 2rem;
+            margin-bottom: 10px;
+        }
+
+        .export-option-title {
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 5px;
+        }
+
+        .export-option-desc {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
         }
 
         .stats-container {
@@ -1079,6 +1354,54 @@
                 width: 100%;
                 justify-content: center;
             }
+
+            .reminder-panel {
+                width: calc(100% - 40px);
+                right: 20px;
+                left: 20px;
+            }
+
+            .timeline::before {
+                left: 30px;
+            }
+
+            .timeline-item {
+                flex-direction: row !important;
+            }
+
+            .timeline-dot {
+                left: 30px;
+            }
+
+            .timeline-content {
+                margin-left: 60px;
+                margin-right: 20px;
+            }
+        }
+
+        @media print {
+            .nav-tabs,
+            .btn-add,
+            .btn-edit,
+            .btn-delete,
+            .modal,
+            .card-actions,
+            .data-controls,
+            .reminder-badge,
+            .reminder-panel {
+                display: none !important;
+            }
+
+            body {
+                background: white;
+            }
+
+            .ceremony-card,
+            .guest-item,
+            .vendor-card,
+            .task-item {
+                page-break-inside: avoid;
+            }
         }
 
         ::-webkit-scrollbar {
@@ -1114,19 +1437,46 @@
             
             <!-- Data Controls -->
             <div class="data-controls">
+                <button onclick="window.weddingApp.toggleExportMenu()" class="btn btn-secondary">
+                    📤 Export/Share
+                </button>
                 <button onclick="window.weddingApp.exportData()" class="btn btn-secondary">
-                    📥 Export Data
+                    💾 Backup Data
                 </button>
                 <label for="importFile" class="btn btn-secondary" style="cursor: pointer;">
-                    📤 Import Data
+                    📥 Import Data
                     <input type="file" id="importFile" accept=".json" style="display: none;" onchange="window.weddingApp.importData(this.files[0])">
                 </label>
-                <button onclick="window.print()" class="btn btn-secondary">
-                    🖨️ Print
-                </button>
                 <button onclick="window.weddingApp.clearAllData()" class="btn btn-danger">
                     🗑️ Clear All Data
                 </button>
+            </div>
+
+            <!-- Export Menu -->
+            <div class="export-menu" id="exportMenu">
+                <h3 style="margin-bottom: 10px;">Share & Export Options</h3>
+                <div class="export-options">
+                    <div class="export-option" onclick="window.weddingApp.exportAsExcel()">
+                        <div class="export-option-icon">📊</div>
+                        <div class="export-option-title">Excel Export</div>
+                        <div class="export-option-desc">Guest list & vendors</div>
+                    </div>
+                    <div class="export-option" onclick="window.weddingApp.exportAsPDF()">
+                        <div class="export-option-icon">📄</div>
+                        <div class="export-option-title">PDF Report</div>
+                        <div class="export-option-desc">Complete wedding plan</div>
+                    </div>
+                    <div class="export-option" onclick="window.weddingApp.shareReadOnly()">
+                        <div class="export-option-icon">🔗</div>
+                        <div class="export-option-title">Share Link</div>
+                        <div class="export-option-desc">Read-only for family</div>
+                    </div>
+                    <div class="export-option" onclick="window.print()">
+                        <div class="export-option-icon">🖨️</div>
+                        <div class="export-option-title">Print</div>
+                        <div class="export-option-desc">Vendor contact sheet</div>
+                    </div>
+                </div>
             </div>
         </header>
 
@@ -1161,12 +1511,34 @@
 
         <!-- Navigation Tabs -->
         <nav class="nav-tabs">
+            <button class="nav-tab" onclick="window.weddingApp.showSection('timeline')">📅 Timeline</button>
             <button class="nav-tab active" onclick="window.weddingApp.showSection('ceremonies')">🎊 Ceremonies</button>
             <button class="nav-tab" onclick="window.weddingApp.showSection('guests')">👥 Guests</button>
             <button class="nav-tab" onclick="window.weddingApp.showSection('vendors')">🛍️ Vendors</button>
             <button class="nav-tab" onclick="window.weddingApp.showSection('tasks')">📋 Tasks</button>
             <button class="nav-tab" onclick="window.weddingApp.showSection('budget')">💰 Budget</button>
         </nav>
+
+        <!-- Search and Filter Bar -->
+        <div class="search-filter-bar" id="searchFilterBar">
+            <input type="text" class="search-input" id="searchInput" placeholder="Search guests, vendors, or ceremonies..." onkeyup="window.weddingApp.handleSearch(this.value)">
+            <div class="filter-buttons" id="filterButtons">
+                <!-- Dynamic filter buttons will be added here -->
+            </div>
+        </div>
+
+        <!-- Timeline Section -->
+        <div class="section" id="timeline">
+            <div class="section-header">
+                <div>
+                    <h2 class="section-title">📅 Wedding Timeline</h2>
+                    <p class="section-subtitle">Your ceremonies at a glance</p>
+                </div>
+            </div>
+            <div class="timeline-view" id="timelineView">
+                <!-- Timeline items will be dynamically added here -->
+            </div>
+        </div>
 
         <!-- Ceremonies Section -->
         <div class="section active" id="ceremonies">
@@ -1271,6 +1643,21 @@
         </div>
     </div>
 
+    <!-- Reminder Badge and Panel -->
+    <div class="reminder-badge" id="reminderBadge" onclick="window.weddingApp.toggleReminders()">
+        🔔
+    </div>
+    
+    <div class="reminder-panel" id="reminderPanel">
+        <h3 style="margin-bottom: 15px;">📋 Reminders & Alerts</h3>
+        <div id="reminderList">
+            <!-- Reminders will be dynamically added here -->
+        </div>
+        <button class="btn btn-secondary" style="width: 100%; margin-top: 15px;" onclick="window.weddingApp.enableNotifications()">
+            🔔 Enable Notifications
+        </button>
+    </div>
+
     <!-- Modal -->
     <div class="modal" id="modal">
         <div class="modal-content">
@@ -1291,7 +1678,7 @@
     </div>
 
     <script>
-        // Wedding Mantra App - Main JavaScript
+        // Wedding Mantra App - Enhanced Version
         class WeddingMantraApp {
             constructor() {
                 this.data = {
@@ -1302,10 +1689,18 @@
                     budget: {
                         total: 0,
                         spent: 0
+                    },
+                    reminders: [],
+                    settings: {
+                        notifications: false,
+                        reminderDays: 7
                     }
                 };
                 this.currentEditId = null;
                 this.currentEditType = null;
+                this.currentSection = 'ceremonies';
+                this.searchQuery = '';
+                this.filters = {};
                 this.init();
             }
 
@@ -1314,9 +1709,405 @@
                 this.renderAll();
                 this.updateStats();
                 this.setupAutoSave();
+                this.setupServiceWorker();
+                this.checkReminders();
+                this.setupReminderInterval();
                 
                 if (this.isFirstTime()) {
                     this.addSampleData();
+                }
+            }
+
+            // Service Worker for Offline Support
+            setupServiceWorker() {
+                if ('serviceWorker' in navigator) {
+                    const swCode = `
+                        self.addEventListener('install', event => {
+                            self.skipWaiting();
+                        });
+                        
+                        self.addEventListener('activate', event => {
+                            event.waitUntil(clients.claim());
+                        });
+                        
+                        self.addEventListener('fetch', event => {
+                            event.respondWith(
+                                fetch(event.request).catch(() => {
+                                    return new Response('Offline - Wedding Mantra works offline!');
+                                })
+                            );
+                        });
+                    `;
+                    
+                    const blob = new Blob([swCode], { type: 'application/javascript' });
+                    const swUrl = URL.createObjectURL(blob);
+                    
+                    navigator.serviceWorker.register(swUrl).then(registration => {
+                        console.log('Service Worker registered');
+                    }).catch(error => {
+                        console.log('Service Worker registration failed:', error);
+                    });
+                }
+            }
+
+            // Reminder System
+            setupReminderInterval() {
+                setInterval(() => {
+                    this.checkReminders();
+                }, 60000); // Check every minute
+            }
+
+            checkReminders() {
+                const reminders = [];
+                const today = new Date();
+                
+                // Check task due dates
+                this.data.tasks.forEach(task => {
+                    if (!task.completed) {
+                        const dueDate = new Date(task.dueDate);
+                        const daysUntil = Math.ceil((dueDate - today) / (1000 * 60 * 60 * 24));
+                        
+                        if (daysUntil <= 3 && daysUntil >= 0) {
+                            reminders.push({
+                                type: daysUntil === 0 ? 'urgent' : 'warning',
+                                title: 'Task Due Soon',
+                                message: `"${task.title}" is due ${daysUntil === 0 ? 'today' : 'in ' + daysUntil + ' days'}`
+                            });
+                        }
+                    }
+                });
+                
+                // Check ceremony dates
+                this.data.ceremonies.forEach(ceremony => {
+                    const ceremonyDate = new Date(ceremony.date);
+                    const daysUntil = Math.ceil((ceremonyDate - today) / (1000 * 60 * 60 * 24));
+                    
+                    if (daysUntil <= 7 && daysUntil >= 0) {
+                        reminders.push({
+                            type: daysUntil <= 2 ? 'urgent' : 'info',
+                            title: 'Ceremony Coming Up',
+                            message: `${ceremony.name} is ${daysUntil === 0 ? 'today!' : 'in ' + daysUntil + ' days'}`
+                        });
+                    }
+                });
+                
+                // Check pending RSVPs
+                const pendingGuests = this.data.guests.filter(g => g.status === 'pending').length;
+                if (pendingGuests > 0) {
+                    reminders.push({
+                        type: 'info',
+                        title: 'Pending RSVPs',
+                        message: `${pendingGuests} guests haven't responded yet`
+                    });
+                }
+                
+                this.data.reminders = reminders;
+                this.renderReminders();
+                
+                // Update badge
+                const badge = document.getElementById('reminderBadge');
+                if (reminders.length > 0) {
+                    badge.classList.add('has-notifications');
+                } else {
+                    badge.classList.remove('has-notifications');
+                }
+                
+                // Show browser notifications if enabled
+                if (this.data.settings.notifications && reminders.length > 0) {
+                    this.showBrowserNotification(reminders[0]);
+                }
+            }
+
+            renderReminders() {
+                const reminderList = document.getElementById('reminderList');
+                if (!reminderList) return;
+                
+                if (this.data.reminders.length === 0) {
+                    reminderList.innerHTML = '<p style="text-align: center; color: #999;">No reminders at this time</p>';
+                    return;
+                }
+                
+                reminderList.innerHTML = this.data.reminders.map(reminder => `
+                    <div class="reminder-item ${reminder.type}">
+                        <strong>${reminder.title}</strong>
+                        <div style="margin-top: 5px; font-size: 0.9rem;">${reminder.message}</div>
+                    </div>
+                `).join('');
+            }
+
+            toggleReminders() {
+                const panel = document.getElementById('reminderPanel');
+                panel.classList.toggle('active');
+            }
+
+            enableNotifications() {
+                if ('Notification' in window) {
+                    Notification.requestPermission().then(permission => {
+                        if (permission === 'granted') {
+                            this.data.settings.notifications = true;
+                            this.saveData();
+                            this.showNotification('Notifications enabled!', 'success');
+                            new Notification('Wedding Mantra', {
+                                body: 'You will now receive wedding planning reminders!',
+                                icon: 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><text y="0.9em" font-size="90">👰</text></svg>'
+                            });
+                        }
+                    });
+                }
+            }
+
+            showBrowserNotification(reminder) {
+                if ('Notification' in window && Notification.permission === 'granted') {
+                    new Notification(reminder.title, {
+                        body: reminder.message,
+                        icon: 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><text y="0.9em" font-size="90">👰</text></svg>'
+                    });
+                }
+            }
+
+            // Timeline View
+            renderTimeline() {
+                const timelineView = document.getElementById('timelineView');
+                if (!timelineView) return;
+                
+                const sortedCeremonies = [...this.data.ceremonies].sort((a, b) => 
+                    new Date(a.date) - new Date(b.date)
+                );
+                
+                if (sortedCeremonies.length === 0) {
+                    timelineView.innerHTML = `
+                        <div class="empty-state">
+                            <div class="empty-state-icon">📅</div>
+                            <div class="empty-state-text">No ceremonies scheduled yet</div>
+                            <button class="btn-add" onclick="window.weddingApp.openModal('ceremony')">Add Your First Ceremony</button>
+                        </div>
+                    `;
+                    return;
+                }
+                
+                timelineView.innerHTML = '<div class="timeline">' + sortedCeremonies.map((ceremony, index) => {
+                    const date = new Date(ceremony.date);
+                    const today = new Date();
+                    const daysUntil = Math.ceil((date - today) / (1000 * 60 * 60 * 24));
+                    const isPast = daysUntil < 0;
+                    
+                    return `
+                        <div class="timeline-item">
+                            <div class="timeline-dot"></div>
+                            <div class="timeline-content">
+                                <div class="timeline-date">${date.toLocaleDateString('en-IN', { 
+                                    weekday: 'long', 
+                                    year: 'numeric', 
+                                    month: 'long', 
+                                    day: 'numeric' 
+                                })}</div>
+                                <div class="timeline-title">${ceremony.name}</div>
+                                <div style="color: #666; font-size: 0.9rem;">
+                                    📍 ${ceremony.venue} | ⏰ ${ceremony.time} | 👥 ${ceremony.guests} guests
+                                </div>
+                                <div class="countdown ${isPast ? 'past' : ''}">
+                                    ${isPast ? '✅ Completed' : daysUntil === 0 ? '🎊 Today!' : `⏳ ${daysUntil} days to go`}
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                }).join('') + '</div>';
+                
+                timelineView.classList.add('active');
+            }
+
+            // Search and Filter
+            handleSearch(query) {
+                this.searchQuery = query.toLowerCase();
+                this.applyFilters();
+            }
+
+            applyFilters() {
+                const query = this.searchQuery;
+                
+                if (this.currentSection === 'guests') {
+                    const filtered = this.data.guests.filter(guest => 
+                        guest.name.toLowerCase().includes(query) ||
+                        (guest.email && guest.email.toLowerCase().includes(query)) ||
+                        (guest.phone && guest.phone.includes(query))
+                    );
+                    this.renderFilteredGuests(filtered);
+                } else if (this.currentSection === 'vendors') {
+                    const filtered = this.data.vendors.filter(vendor =>
+                        vendor.name.toLowerCase().includes(query) ||
+                        vendor.type.toLowerCase().includes(query) ||
+                        (vendor.contact && vendor.contact.toLowerCase().includes(query))
+                    );
+                    this.renderFilteredVendors(filtered);
+                } else if (this.currentSection === 'ceremonies') {
+                    const filtered = this.data.ceremonies.filter(ceremony =>
+                        ceremony.name.toLowerCase().includes(query) ||
+                        ceremony.venue.toLowerCase().includes(query) ||
+                        ceremony.type.toLowerCase().includes(query)
+                    );
+                    this.renderFilteredCeremonies(filtered);
+                }
+            }
+
+            renderFilteredGuests(guests) {
+                const list = document.getElementById('guestsList');
+                if (!list) return;
+                
+                if (guests.length === 0) {
+                    list.innerHTML = '<p style="text-align: center; padding: 40px; color: #999;">No guests found matching your search</p>';
+                    return;
+                }
+                
+                list.innerHTML = guests.map(guest => this.getGuestHTML(guest)).join('');
+            }
+
+            renderFilteredVendors(vendors) {
+                const grid = document.getElementById('vendorGrid');
+                if (!grid) return;
+                
+                if (vendors.length === 0) {
+                    grid.innerHTML = '<p style="grid-column: 1/-1; text-align: center; padding: 40px; color: #999;">No vendors found matching your search</p>';
+                    return;
+                }
+                
+                grid.innerHTML = vendors.map(vendor => this.getVendorHTML(vendor)).join('');
+            }
+
+            renderFilteredCeremonies(ceremonies) {
+                const grid = document.getElementById('ceremonyGrid');
+                if (!grid) return;
+                
+                if (ceremonies.length === 0) {
+                    grid.innerHTML = '<p style="grid-column: 1/-1; text-align: center; padding: 40px; color: #999;">No ceremonies found matching your search</p>';
+                    return;
+                }
+                
+                grid.innerHTML = ceremonies.map(ceremony => this.getCeremonyHTML(ceremony)).join('');
+            }
+
+            // Export Functions
+            toggleExportMenu() {
+                const menu = document.getElementById('exportMenu');
+                menu.classList.toggle('active');
+            }
+
+            exportAsExcel() {
+                let csvContent = "data:text/csv;charset=utf-8,";
+                
+                // Guest List
+                csvContent += "GUEST LIST\n";
+                csvContent += "Name,Members,Email,Phone,Status,Requirements\n";
+                this.data.guests.forEach(guest => {
+                    csvContent += `"${guest.name}",${guest.members},"${guest.email || ''}","${guest.phone || ''}","${guest.status}","${guest.requirements || ''}"\n`;
+                });
+                
+                csvContent += "\n\nVENDOR LIST\n";
+                csvContent += "Name,Type,Contact,Phone,Email,Price,Status\n";
+                this.data.vendors.forEach(vendor => {
+                    csvContent += `"${vendor.name}","${vendor.type}","${vendor.contact || ''}","${vendor.phone}","${vendor.email || ''}",${vendor.price},"${vendor.status}"\n`;
+                });
+                
+                const encodedUri = encodeURI(csvContent);
+                const link = document.createElement("a");
+                link.setAttribute("href", encodedUri);
+                link.setAttribute("download", `wedding_data_${new Date().toISOString().split('T')[0]}.csv`);
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                
+                this.showNotification('Excel file downloaded!', 'success');
+            }
+
+            exportAsPDF() {
+                const printContent = `
+                    <html>
+                    <head>
+                        <title>Wedding Mantra Report</title>
+                        <style>
+                            body { font-family: Arial, sans-serif; padding: 20px; }
+                            h1 { color: #FF6B35; }
+                            h2 { color: #333; margin-top: 30px; }
+                            table { width: 100%; border-collapse: collapse; margin: 20px 0; }
+                            th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+                            th { background: #f4f4f4; }
+                        </style>
+                    </head>
+                    <body>
+                        <h1>Wedding Planning Report</h1>
+                        <p>Generated on ${new Date().toLocaleDateString()}</p>
+                        
+                        <h2>Ceremonies</h2>
+                        <table>
+                            <tr><th>Name</th><th>Date</th><th>Time</th><th>Venue</th><th>Guests</th><th>Budget</th></tr>
+                            ${this.data.ceremonies.map(c => `
+                                <tr>
+                                    <td>${c.name}</td>
+                                    <td>${c.date}</td>
+                                    <td>${c.time}</td>
+                                    <td>${c.venue}</td>
+                                    <td>${c.guests}</td>
+                                    <td>₹${c.budget.toLocaleString('en-IN')}</td>
+                                </tr>
+                            `).join('')}
+                        </table>
+                        
+                        <h2>Guest List</h2>
+                        <table>
+                            <tr><th>Name</th><th>Members</th><th>Contact</th><th>Status</th></tr>
+                            ${this.data.guests.map(g => `
+                                <tr>
+                                    <td>${g.name}</td>
+                                    <td>${g.members}</td>
+                                    <td>${g.email || g.phone || '-'}</td>
+                                    <td>${g.status}</td>
+                                </tr>
+                            `).join('')}
+                        </table>
+                        
+                        <h2>Vendors</h2>
+                        <table>
+                            <tr><th>Name</th><th>Service</th><th>Contact</th><th>Price</th><th>Status</th></tr>
+                            ${this.data.vendors.map(v => `
+                                <tr>
+                                    <td>${v.name}</td>
+                                    <td>${v.type}</td>
+                                    <td>${v.phone}</td>
+                                    <td>₹${v.price.toLocaleString('en-IN')}</td>
+                                    <td>${v.status}</td>
+                                </tr>
+                            `).join('')}
+                        </table>
+                    </body>
+                    </html>
+                `;
+                
+                const printWindow = window.open('', '', 'height=600,width=800');
+                printWindow.document.write(printContent);
+                printWindow.document.close();
+                printWindow.print();
+            }
+
+            shareReadOnly() {
+                const shareData = {
+                    version: '1.0',
+                    shared: new Date().toISOString(),
+                    data: this.data,
+                    readOnly: true
+                };
+                
+                const encodedData = btoa(JSON.stringify(shareData));
+                const shareUrl = `${window.location.origin}${window.location.pathname}#share=${encodedData.substring(0, 100)}...`;
+                
+                if (navigator.share) {
+                    navigator.share({
+                        title: 'Wedding Mantra - Our Wedding Plan',
+                        text: 'Check out our wedding planning details!',
+                        url: shareUrl
+                    }).catch(err => console.log('Share failed:', err));
+                } else {
+                    navigator.clipboard.writeText(shareUrl).then(() => {
+                        this.showNotification('Share link copied to clipboard!', 'success');
+                    });
                 }
             }
 
@@ -1347,7 +2138,9 @@
                             guests: parsed.guests || [],
                             vendors: parsed.vendors || [],
                             tasks: parsed.tasks || [],
-                            budget: parsed.budget || { total: 0, spent: 0 }
+                            budget: parsed.budget || { total: 0, spent: 0 },
+                            reminders: parsed.reminders || [],
+                            settings: parsed.settings || { notifications: false, reminderDays: 7 }
                         };
                     }
                 } catch (e) {
@@ -1475,6 +2268,8 @@
 
             // Section Navigation
             showSection(sectionId) {
+                this.currentSection = sectionId;
+                
                 document.querySelectorAll('.section').forEach(section => {
                     section.classList.remove('active');
                 });
@@ -1491,6 +2286,23 @@
                 if (event && event.target) {
                     event.target.classList.add('active');
                 }
+                
+                // Show/hide search bar based on section
+                const searchBar = document.getElementById('searchFilterBar');
+                if (['guests', 'vendors', 'ceremonies'].includes(sectionId)) {
+                    searchBar.classList.add('active');
+                } else {
+                    searchBar.classList.remove('active');
+                }
+                
+                // Render timeline if needed
+                if (sectionId === 'timeline') {
+                    this.renderTimeline();
+                }
+                
+                // Clear search
+                document.getElementById('searchInput').value = '';
+                this.searchQuery = '';
             }
 
             // Modal Functions
@@ -1649,6 +2461,7 @@
                 }
                 
                 this.closeModal();
+                this.checkReminders();
             }
 
             // CRUD Operations
@@ -1794,31 +2607,9 @@
                 this.updateBudgetDisplay();
             }
 
-            // Rendering Functions
-            renderAll() {
-                this.renderCeremonies();
-                this.renderGuests();
-                this.renderVendors();
-                this.renderTasks();
-                this.updateBudgetDisplay();
-            }
-
-            renderCeremonies() {
-                const grid = document.getElementById('ceremonyGrid');
-                if (!grid) return;
-                
-                if (this.data.ceremonies.length === 0) {
-                    grid.innerHTML = `
-                        <div class="empty-state" style="grid-column: 1/-1;">
-                            <div class="empty-state-icon">🎊</div>
-                            <div class="empty-state-text">No ceremonies added yet</div>
-                            <button class="btn-add" onclick="window.weddingApp.openModal('ceremony')">Add Your First Ceremony</button>
-                        </div>
-                    `;
-                    return;
-                }
-
-                grid.innerHTML = this.data.ceremonies.map(ceremony => `
+            // HTML Generators
+            getCeremonyHTML(ceremony) {
+                return `
                     <div class="ceremony-card">
                         <div class="card-actions">
                             <button class="btn-edit" onclick="window.weddingApp.editItem('ceremony', '${ceremony.id}')" title="Edit">✏️</button>
@@ -1864,7 +2655,82 @@
                             ` : ''}
                         </div>
                     </div>
-                `).join('');
+                `;
+            }
+
+            getGuestHTML(guest) {
+                return `
+                    <div class="guest-item">
+                        <div>
+                            <div class="guest-name">${this.escapeHtml(guest.name)}</div>
+                            <div class="guest-details">
+                                <span>👥 ${guest.members} members</span>
+                                ${guest.email ? `<span>📧 ${this.escapeHtml(guest.email)}</span>` : ''}
+                                ${guest.phone ? `<span>📱 ${this.escapeHtml(guest.phone)}</span>` : ''}
+                                ${guest.requirements ? `<span>📝 ${this.escapeHtml(guest.requirements)}</span>` : ''}
+                            </div>
+                        </div>
+                        <div class="guest-actions">
+                            <span class="guest-status status-${guest.status}">${guest.status.charAt(0).toUpperCase() + guest.status.slice(1)}</span>
+                            <button class="btn-edit" onclick="window.weddingApp.editItem('guest', '${guest.id}')" title="Edit">✏️</button>
+                            <button class="btn-delete" onclick="window.weddingApp.deleteItem('guest', '${guest.id}')" title="Delete">🗑️</button>
+                        </div>
+                    </div>
+                `;
+            }
+
+            getVendorHTML(vendor) {
+                const vendorIcons = {
+                    photographer: '📸',
+                    videographer: '🎥',
+                    catering: '🍽️',
+                    decoration: '🌸',
+                    makeup: '💄',
+                    music: '🎵',
+                    transportation: '🚗',
+                    other: '📦'
+                };
+                
+                return `
+                    <div class="vendor-card">
+                        <div class="card-actions">
+                            <button class="btn-edit" onclick="window.weddingApp.editItem('vendor', '${vendor.id}')" title="Edit">✏️</button>
+                            <button class="btn-delete" onclick="window.weddingApp.deleteItem('vendor', '${vendor.id}')" title="Delete">🗑️</button>
+                        </div>
+                        <div class="vendor-icon">${vendorIcons[vendor.type] || '📦'}</div>
+                        <div class="vendor-name">${this.escapeHtml(vendor.name)}</div>
+                        <div class="vendor-type">${vendor.type.charAt(0).toUpperCase() + vendor.type.slice(1)}</div>
+                        <div class="vendor-price">₹${vendor.price.toLocaleString('en-IN')}</div>
+                        <span class="vendor-status status-${vendor.status}">${vendor.status.charAt(0).toUpperCase() + vendor.status.slice(1)}</span>
+                    </div>
+                `;
+            }
+
+            // Rendering Functions
+            renderAll() {
+                this.renderCeremonies();
+                this.renderGuests();
+                this.renderVendors();
+                this.renderTasks();
+                this.updateBudgetDisplay();
+            }
+
+            renderCeremonies() {
+                const grid = document.getElementById('ceremonyGrid');
+                if (!grid) return;
+                
+                if (this.data.ceremonies.length === 0) {
+                    grid.innerHTML = `
+                        <div class="empty-state" style="grid-column: 1/-1;">
+                            <div class="empty-state-icon">🎊</div>
+                            <div class="empty-state-text">No ceremonies added yet</div>
+                            <button class="btn-add" onclick="window.weddingApp.openModal('ceremony')">Add Your First Ceremony</button>
+                        </div>
+                    `;
+                    return;
+                }
+
+                grid.innerHTML = this.data.ceremonies.map(ceremony => this.getCeremonyHTML(ceremony)).join('');
             }
 
             renderGuests() {
@@ -1882,24 +2748,7 @@
                     return;
                 }
 
-                list.innerHTML = this.data.guests.map(guest => `
-                    <div class="guest-item">
-                        <div>
-                            <div class="guest-name">${this.escapeHtml(guest.name)}</div>
-                            <div class="guest-details">
-                                <span>👥 ${guest.members} members</span>
-                                ${guest.email ? `<span>📧 ${this.escapeHtml(guest.email)}</span>` : ''}
-                                ${guest.phone ? `<span>📱 ${this.escapeHtml(guest.phone)}</span>` : ''}
-                                ${guest.requirements ? `<span>📝 ${this.escapeHtml(guest.requirements)}</span>` : ''}
-                            </div>
-                        </div>
-                        <div class="guest-actions">
-                            <span class="guest-status status-${guest.status}">${guest.status.charAt(0).toUpperCase() + guest.status.slice(1)}</span>
-                            <button class="btn-edit" onclick="window.weddingApp.editItem('guest', '${guest.id}')" title="Edit">✏️</button>
-                            <button class="btn-delete" onclick="window.weddingApp.deleteItem('guest', '${guest.id}')" title="Delete">🗑️</button>
-                        </div>
-                    </div>
-                `).join('');
+                list.innerHTML = this.data.guests.map(guest => this.getGuestHTML(guest)).join('');
             }
 
             renderVendors() {
@@ -1917,30 +2766,7 @@
                     return;
                 }
 
-                const vendorIcons = {
-                    photographer: '📸',
-                    videographer: '🎥',
-                    catering: '🍽️',
-                    decoration: '🌸',
-                    makeup: '💄',
-                    music: '🎵',
-                    transportation: '🚗',
-                    other: '📦'
-                };
-
-                grid.innerHTML = this.data.vendors.map(vendor => `
-                    <div class="vendor-card">
-                        <div class="card-actions">
-                            <button class="btn-edit" onclick="window.weddingApp.editItem('vendor', '${vendor.id}')" title="Edit">✏️</button>
-                            <button class="btn-delete" onclick="window.weddingApp.deleteItem('vendor', '${vendor.id}')" title="Delete">🗑️</button>
-                        </div>
-                        <div class="vendor-icon">${vendorIcons[vendor.type] || '📦'}</div>
-                        <div class="vendor-name">${this.escapeHtml(vendor.name)}</div>
-                        <div class="vendor-type">${vendor.type.charAt(0).toUpperCase() + vendor.type.slice(1)}</div>
-                        <div class="vendor-price">₹${vendor.price.toLocaleString('en-IN')}</div>
-                        <span class="vendor-status status-${vendor.status}">${vendor.status.charAt(0).toUpperCase() + vendor.status.slice(1)}</span>
-                    </div>
-                `).join('');
+                grid.innerHTML = this.data.vendors.map(vendor => this.getVendorHTML(vendor)).join('');
             }
 
             renderTasks() {
@@ -2052,14 +2878,6 @@
                     .filter(v => v.status === 'booked')
                     .reduce((sum, v) => sum + (parseInt(v.price) || 0), 0);
                 return ceremonyBudget + vendorBudget;
-            }
-
-            // Utility function for HTML escaping (standalone)
-            escapeHtmlValue(text) {
-                if (!text) return '';
-                const div = document.createElement('div');
-                div.textContent = text;
-                return div.innerHTML;
             }
 
             // Form Templates
@@ -2336,6 +3154,7 @@
                             this.saveData();
                             this.renderAll();
                             this.updateStats();
+                            this.checkReminders();
                             this.showNotification('Data imported successfully!', 'success');
                         }
                     } catch (error) {
@@ -2363,11 +3182,17 @@
                             budget: {
                                 total: 0,
                                 spent: 0
+                            },
+                            reminders: [],
+                            settings: {
+                                notifications: false,
+                                reminderDays: 7
                             }
                         };
                         this.saveData();
                         this.renderAll();
                         this.updateStats();
+                        this.checkReminders();
                         this.showNotification('All data has been cleared', 'success');
                     }
                 }
@@ -2386,7 +3211,7 @@
 
         document.addEventListener('DOMContentLoaded', () => {
             window.weddingApp = new WeddingMantraApp();
-            console.log('👰 Wedding Mantra initialized successfully!');
+            console.log('👰 Wedding Mantra Enhanced initialized successfully!');
             console.log('✨ May your wedding planning be smooth and joyful!');
         });
 
@@ -2401,6 +3226,10 @@
         document.addEventListener('keydown', (e) => {
             if (e.key === 'Escape' && window.weddingApp) {
                 window.weddingApp.closeModal();
+                const reminderPanel = document.getElementById('reminderPanel');
+                if (reminderPanel && reminderPanel.classList.contains('active')) {
+                    reminderPanel.classList.remove('active');
+                }
             }
             
             if ((e.ctrlKey || e.metaKey) && e.key === 's') {
@@ -2416,6 +3245,17 @@
             if (modal && modal.classList.contains('active')) {
                 e.preventDefault();
                 e.returnValue = '';
+            }
+        });
+
+        // Check for shared data in URL
+        window.addEventListener('load', () => {
+            if (window.location.hash.startsWith('#share=')) {
+                const shareNotice = document.createElement('div');
+                shareNotice.style.cssText = 'position: fixed; top: 20px; left: 50%; transform: translateX(-50%); background: #FFF3E0; color: #E65100; padding: 15px 25px; border-radius: 25px; z-index: 10000; font-weight: 600;';
+                shareNotice.textContent = 'This is a read-only view of shared wedding plans';
+                document.body.appendChild(shareNotice);
+                setTimeout(() => shareNotice.remove(), 5000);
             }
         });
     </script>

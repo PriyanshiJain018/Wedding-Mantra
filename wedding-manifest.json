@@ -1,0 +1,52 @@
+{
+  "name": "Wedding Mantra - Complete Wedding Planner",
+  "short_name": "Wedding Mantra",
+  "description": "Your complete traditional Indian wedding planning companion",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#FFF5E6",
+  "theme_color": "#FF6B35",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["lifestyle", "productivity"],
+  "screenshots": [
+    {
+      "src": "screenshot1.png",
+      "sizes": "1080x1920",
+      "type": "image/png"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Add Ceremony",
+      "short_name": "Ceremony",
+      "description": "Add a new wedding ceremony",
+      "url": "./index.html#ceremonies"
+    },
+    {
+      "name": "Guest List",
+      "short_name": "Guests",
+      "description": "Manage guest list",
+      "url": "./index.html#guests"
+    },
+    {
+      "name": "Budget",
+      "short_name": "Budget",
+      "description": "Track wedding budget",
+      "url": "./index.html#budget"
+    }
+  ]
+}

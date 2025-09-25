@@ -1,0 +1,2431 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Wedding Mantra - Your Dream Wedding Planner</title>
+    <meta name="description" content="Plan your perfect Indian wedding with Wedding Mantra - manage ceremonies, guests, vendors, and budget all in one place">
+    <meta name="theme-color" content="#FF6B35">
+    
+    <style>
+        :root {
+            --primary: linear-gradient(135deg, #FF6B35 0%, #F7931E 100%);
+            --gold: linear-gradient(135deg, #FFD700 0%, #FFA000 100%);
+            --rose: linear-gradient(135deg, #FF1744 0%, #E91E63 100%);
+            --purple: linear-gradient(135deg, #9C27B0 0%, #BA68C8 100%);
+            --green: linear-gradient(135deg, #00C853 0%, #00E676 100%);
+            --blue: linear-gradient(135deg, #2196F3 0%, #64B5F6 100%);
+            --text-primary: #2C3E50;
+            --text-secondary: #546E7A;
+            --bg-light: #FFF8F3;
+            --shadow: 0 4px 20px rgba(0,0,0,0.08);
+            --shadow-hover: 0 8px 30px rgba(0,0,0,0.12);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: linear-gradient(135deg, #FFF5E6 0%, #FFE4E1 50%, #FFF0F5 100%);
+            min-height: 100vh;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 100vh;
+            background-image: 
+                radial-gradient(circle at 10% 20%, rgba(255, 107, 53, 0.05) 0%, transparent 50%),
+                radial-gradient(circle at 80% 80%, rgba(156, 39, 176, 0.05) 0%, transparent 50%),
+                radial-gradient(circle at 40% 60%, rgba(255, 215, 0, 0.03) 0%, transparent 50%);
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .header {
+            text-align: center;
+            padding: 30px 0;
+            position: relative;
+            animation: fadeInDown 0.8s ease;
+        }
+
+        .header::before, .header::after {
+            content: '✨';
+            position: absolute;
+            font-size: 2rem;
+            animation: sparkle 2s infinite;
+        }
+
+        .header::before {
+            left: 10%;
+            top: 20%;
+        }
+
+        .header::after {
+            right: 10%;
+            top: 20%;
+            animation-delay: 1s;
+        }
+
+        @keyframes sparkle {
+            0%, 100% { opacity: 0; transform: scale(0.8) rotate(0deg); }
+            50% { opacity: 1; transform: scale(1.2) rotate(180deg); }
+        }
+
+        .logo {
+            display: inline-flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 15px;
+            padding: 15px 30px;
+            background: white;
+            border-radius: 50px;
+            box-shadow: var(--shadow);
+        }
+
+        .logo-icon {
+            width: 50px;
+            height: 50px;
+            background: var(--primary);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            animation: heartbeat 2s infinite;
+            font-size: 28px;
+        }
+
+        .logo-icon::before {
+            content: '👑';
+        }
+
+        h1 {
+            background: linear-gradient(135deg, #FF6B35 0%, #E91E63 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            font-size: 2.2rem;
+            font-weight: 700;
+        }
+
+        .tagline {
+            color: var(--text-secondary);
+            font-size: 1rem;
+            margin-top: 10px;
+            padding: 0 20px;
+        }
+
+        .decorative-border {
+            display: flex;
+            justify-content: center;
+            margin: 20px 0;
+            font-size: 1.5rem;
+            color: #FFB74D;
+            animation: float 3s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-5px); }
+        }
+
+        .stats-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin: 30px 0;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 20px;
+            border-radius: 20px;
+            text-align: center;
+            box-shadow: var(--shadow);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+            animation: fadeInUp 0.6s ease backwards;
+        }
+
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: var(--primary);
+        }
+
+        .stat-card:nth-child(1)::before { background: var(--gold); }
+        .stat-card:nth-child(2)::before { background: var(--green); }
+        .stat-card:nth-child(3)::before { background: var(--purple); }
+        .stat-card:nth-child(4)::before { background: var(--blue); }
+        .stat-card:nth-child(5)::before { background: var(--rose); }
+
+        .stat-card:hover {
+            transform: translateY(-5px) scale(1.02);
+            box-shadow: var(--shadow-hover);
+        }
+
+        .stat-icon {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            filter: drop-shadow(2px 2px 4px rgba(0,0,0,0.1));
+        }
+
+        .stat-number {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin: 5px 0;
+        }
+
+        .stat-label {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+
+        .nav-tabs {
+            display: flex;
+            gap: 10px;
+            margin: 30px 0;
+            flex-wrap: wrap;
+            justify-content: center;
+            background: white;
+            padding: 10px;
+            border-radius: 30px;
+            box-shadow: var(--shadow);
+        }
+
+        .nav-tab {
+            padding: 12px 25px;
+            background: transparent;
+            border: 2px solid transparent;
+            color: var(--text-secondary);
+            border-radius: 25px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 600;
+            font-size: 0.95rem;
+            position: relative;
+        }
+
+        .nav-tab:hover {
+            background: rgba(255, 107, 53, 0.1);
+            color: #FF6B35;
+        }
+
+        .nav-tab.active {
+            background: var(--primary);
+            color: white;
+            transform: scale(1.05);
+        }
+
+        .section {
+            display: none;
+            animation: fadeIn 0.5s ease;
+        }
+
+        .section.active {
+            display: block;
+        }
+
+        .ceremony-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+        }
+
+        .ceremony-card {
+            background: white;
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: var(--shadow);
+            transition: all 0.3s ease;
+            position: relative;
+            animation: slideInUp 0.5s ease backwards;
+        }
+
+        .ceremony-card:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--shadow-hover);
+        }
+
+        .card-actions {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            display: flex;
+            gap: 8px;
+            z-index: 10;
+        }
+
+        .btn-edit, .btn-delete {
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            border: none;
+            background: white;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+            font-size: 1.1rem;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .btn-edit:hover {
+            background: #4CAF50;
+            transform: scale(1.1);
+        }
+
+        .btn-delete:hover {
+            background: #f44336;
+            transform: scale(1.1);
+        }
+
+        .ceremony-header {
+            padding: 25px 20px;
+            color: white;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .ceremony-header::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+            animation: rotate 20s linear infinite;
+        }
+
+        @keyframes rotate {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .ceremony-header.mehendi { background: var(--green); }
+        .ceremony-header.sangeet { background: var(--purple); }
+        .ceremony-header.haldi { background: var(--gold); }
+        .ceremony-header.wedding { background: var(--rose); }
+        .ceremony-header.reception { background: var(--blue); }
+        .ceremony-header.other { background: linear-gradient(135deg, #607D8B 0%, #90A4AE 100%); }
+
+        .guest-count {
+            background: rgba(255,255,255,0.25);
+            padding: 6px 15px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            backdrop-filter: blur(10px);
+            display: inline-block;
+            margin-bottom: 10px;
+            font-weight: 600;
+        }
+
+        .ceremony-name {
+            font-size: 1.4rem;
+            font-weight: 700;
+            margin-bottom: 5px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .ceremony-type {
+            opacity: 0.95;
+            font-size: 0.9rem;
+            font-weight: 500;
+            position: relative;
+            z-index: 1;
+        }
+
+        .ceremony-body {
+            padding: 20px;
+        }
+
+        .info-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+            margin: 10px 0;
+        }
+
+        .info-item span:first-child {
+            font-size: 1.3rem;
+        }
+
+        .budget-info {
+            background: var(--bg-light);
+            padding: 15px;
+            border-radius: 15px;
+            margin: 15px 0;
+            border: 2px solid rgba(255, 107, 53, 0.1);
+        }
+
+        .budget-label {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            margin-bottom: 5px;
+            font-weight: 600;
+        }
+
+        .budget-amount {
+            font-size: 1.4rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #FF6B35 0%, #F7931E 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .checklist {
+            margin-top: 20px;
+            padding: 15px;
+            background: rgba(255, 107, 53, 0.05);
+            border-radius: 15px;
+        }
+
+        .checklist-title {
+            font-weight: 700;
+            margin-bottom: 12px;
+            color: var(--text-primary);
+            font-size: 1.05rem;
+        }
+
+        .checklist-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin: 10px 0;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            padding: 8px;
+            border-radius: 10px;
+        }
+
+        .checklist-item:hover {
+            background: rgba(255, 255, 255, 0.8);
+            transform: translateX(5px);
+        }
+
+        .checklist-item input[type="checkbox"] {
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
+            accent-color: #FF6B35;
+        }
+
+        .checklist-item label {
+            cursor: pointer;
+            color: var(--text-primary);
+            font-size: 0.95rem;
+            flex: 1;
+        }
+
+        .checklist-item input[type="checkbox"]:checked + label {
+            color: #999;
+            text-decoration: line-through;
+        }
+
+        .guest-list {
+            display: grid;
+            gap: 15px;
+        }
+
+        .guest-item {
+            padding: 20px;
+            background: white;
+            border-radius: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: var(--shadow);
+            transition: all 0.3s ease;
+            border-left: 4px solid transparent;
+        }
+
+        .guest-item:hover {
+            transform: translateX(5px);
+            box-shadow: var(--shadow-hover);
+            border-left-color: #FF6B35;
+        }
+
+        .guest-name {
+            font-weight: 600;
+            color: var(--text-primary);
+            font-size: 1.1rem;
+            margin-bottom: 8px;
+        }
+
+        .guest-details {
+            display: flex;
+            gap: 15px;
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            flex-wrap: wrap;
+            margin-top: 8px;
+        }
+
+        .guest-status {
+            padding: 6px 15px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+
+        .status-confirmed {
+            background: #E8F5E9;
+            color: #2E7D32;
+        }
+
+        .status-pending {
+            background: #FFF3E0;
+            color: #E65100;
+        }
+
+        .status-declined {
+            background: #FFEBEE;
+            color: #C62828;
+        }
+
+        .guest-actions {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .vendor-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 20px;
+        }
+
+        .vendor-card {
+            background: white;
+            border-radius: 20px;
+            padding: 25px;
+            box-shadow: var(--shadow);
+            transition: all 0.3s ease;
+            text-align: center;
+            position: relative;
+            animation: fadeInUp 0.5s ease backwards;
+        }
+
+        .vendor-card:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--shadow-hover);
+        }
+
+        .vendor-icon {
+            width: 70px;
+            height: 70px;
+            background: var(--primary);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 15px;
+            font-size: 2rem;
+            box-shadow: 0 4px 15px rgba(255, 107, 53, 0.3);
+        }
+
+        .vendor-name {
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 5px;
+        }
+
+        .vendor-type {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            margin-bottom: 15px;
+            font-weight: 500;
+        }
+
+        .vendor-price {
+            font-size: 1.3rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #FF6B35 0%, #F7931E 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .vendor-status {
+            margin-top: 15px;
+            padding: 6px 15px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            display: inline-block;
+            font-weight: 600;
+        }
+
+        .status-booked {
+            background: #E8F5E9;
+            color: #2E7D32;
+        }
+
+        .status-negotiating {
+            background: #FFF3E0;
+            color: #E65100;
+        }
+
+        .task-item {
+            padding: 20px;
+            background: white;
+            border-radius: 15px;
+            margin-bottom: 15px;
+            border-left: 5px solid;
+            box-shadow: var(--shadow);
+            transition: all 0.3s ease;
+        }
+
+        .task-item:hover {
+            transform: translateX(5px);
+            box-shadow: var(--shadow-hover);
+        }
+
+        .task-item.priority-high {
+            border-left-color: #f44336;
+        }
+
+        .task-item.priority-medium {
+            border-left-color: #FF9800;
+        }
+
+        .task-item.priority-low {
+            border-left-color: #4CAF50;
+        }
+
+        .task-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .task-title {
+            font-weight: 600;
+            color: var(--text-primary);
+            font-size: 1.1rem;
+        }
+
+        .task-description {
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+            margin: 10px 0;
+            line-height: 1.5;
+        }
+
+        .task-due {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            margin-top: 10px;
+        }
+
+        .task-priority {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 15px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+
+        .priority-high {
+            background: #FFEBEE;
+            color: #C62828;
+        }
+
+        .priority-medium {
+            background: #FFF3E0;
+            color: #E65100;
+        }
+
+        .priority-low {
+            background: #E8F5E9;
+            color: #2E7D32;
+        }
+
+        .budget-tracker {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: var(--shadow);
+        }
+
+        .budget-overview {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin: 30px 0;
+        }
+
+        .budget-item {
+            text-align: center;
+            padding: 25px;
+            background: var(--bg-light);
+            border-radius: 15px;
+            transition: all 0.3s ease;
+        }
+
+        .budget-item:hover {
+            transform: translateY(-3px);
+            box-shadow: var(--shadow);
+        }
+
+        .budget-item.total {
+            background: linear-gradient(135deg, #FFE5CC 0%, #FFD4B3 100%);
+            border: 2px solid rgba(255, 107, 53, 0.2);
+        }
+
+        .progress-bar {
+            background: #F0F0F0;
+            height: 35px;
+            border-radius: 20px;
+            overflow: hidden;
+            position: relative;
+            box-shadow: inset 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: var(--primary);
+            transition: width 1s ease;
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            padding-right: 15px;
+            color: white;
+            font-weight: 600;
+            font-size: 0.95rem;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.6);
+            z-index: 1000;
+            backdrop-filter: blur(5px);
+        }
+
+        .modal.active {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .modal-content {
+            background: white;
+            padding: 30px;
+            border-radius: 25px;
+            width: 90%;
+            max-width: 500px;
+            max-height: 90vh;
+            overflow-y: auto;
+            animation: slideInUp 0.3s ease;
+            position: relative;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #F0F0F0;
+        }
+
+        .modal-title {
+            font-size: 1.6rem;
+            color: var(--text-primary);
+            font-weight: 700;
+        }
+
+        .close-modal {
+            background: none;
+            border: none;
+            font-size: 1.8rem;
+            cursor: pointer;
+            color: #999;
+            transition: all 0.3s ease;
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .close-modal:hover {
+            background: #F0F0F0;
+            color: #333;
+            transform: rotate(90deg);
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: var(--text-primary);
+            font-weight: 600;
+            font-size: 0.95rem;
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #E0E0E0;
+            border-radius: 12px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            font-family: inherit;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #FF6B35;
+            box-shadow: 0 0 0 4px rgba(255, 107, 53, 0.1);
+        }
+
+        .form-actions {
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+            margin-top: 25px;
+            padding-top: 20px;
+            border-top: 2px solid #F0F0F0;
+        }
+
+        .btn {
+            padding: 12px 25px;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            font-size: 1rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-add {
+            background: var(--primary);
+            color: white;
+            padding: 12px 25px;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            font-size: 1rem;
+        }
+
+        .btn-add:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(255, 107, 53, 0.4);
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(255, 107, 53, 0.4);
+        }
+
+        .btn-secondary {
+            background: #F5F5F5;
+            color: var(--text-secondary);
+        }
+
+        .btn-secondary:hover {
+            background: #E0E0E0;
+            transform: translateY(-1px);
+        }
+
+        .btn-danger {
+            background: #FFEBEE;
+            color: #C62828;
+        }
+
+        .btn-danger:hover {
+            background: #f44336;
+            color: white;
+        }
+
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .section-title {
+            font-size: 1.8rem;
+            color: var(--text-primary);
+            font-weight: 700;
+        }
+
+        .section-subtitle {
+            color: var(--text-secondary);
+            margin-top: 5px;
+            font-size: 0.95rem;
+        }
+
+        .data-controls {
+            margin-top: 25px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            justify-content: center;
+        }
+
+        .save-indicator {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: linear-gradient(135deg, #4CAF50 0%, #66BB6A 100%);
+            color: white;
+            padding: 12px 20px;
+            border-radius: 25px;
+            z-index: 9999;
+            font-weight: 600;
+            box-shadow: 0 4px 15px rgba(76, 175, 80, 0.4);
+            animation: slideInRight 0.3s ease, fadeOutUp 0.3s ease 1.7s forwards;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: var(--text-secondary);
+        }
+
+        .empty-state-icon {
+            font-size: 4rem;
+            margin-bottom: 20px;
+            opacity: 0.7;
+            animation: bounce 2s infinite;
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+
+        .empty-state-text {
+            font-size: 1.1rem;
+            margin-bottom: 20px;
+            color: var(--text-primary);
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes fadeInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes slideInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes slideInRight {
+            from {
+                opacity: 0;
+                transform: translateX(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        @keyframes fadeOutUp {
+            from {
+                opacity: 1;
+                transform: translateY(0);
+            }
+            to {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+        }
+
+        @keyframes heartbeat {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 15px;
+            }
+
+            h1 {
+                font-size: 1.8rem;
+            }
+
+            .stats-container {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 10px;
+            }
+
+            .ceremony-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .vendor-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .modal-content {
+                width: 95%;
+                padding: 20px;
+            }
+
+            .section-header {
+                flex-direction: column;
+                text-align: center;
+            }
+
+            .nav-tabs {
+                gap: 5px;
+                padding: 8px;
+            }
+
+            .nav-tab {
+                padding: 10px 20px;
+                font-size: 0.9rem;
+            }
+
+            .guest-item {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 15px;
+            }
+
+            .guest-actions {
+                width: 100%;
+                justify-content: space-between;
+            }
+
+            .data-controls {
+                flex-direction: column;
+            }
+
+            .btn {
+                width: 100%;
+                justify-content: center;
+            }
+        }
+
+        @media print {
+            body {
+                background: white;
+            }
+
+            .nav-tabs,
+            .btn-add,
+            .btn-edit,
+            .btn-delete,
+            .modal,
+            .card-actions,
+            .data-controls {
+                display: none !important;
+            }
+
+            .ceremony-card,
+            .guest-item,
+            .vendor-card,
+            .task-item {
+                page-break-inside: avoid;
+            }
+
+            .container {
+                max-width: 100%;
+            }
+        }
+
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255, 107, 53, 0.3);
+            border-radius: 50%;
+            border-top-color: #FF6B35;
+            animation: spin 1s ease-in-out infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #F0F0F0;
+            border-radius: 10px;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: linear-gradient(135deg, #FF6B35 0%, #F7931E 100%);
+            border-radius: 10px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: linear-gradient(135deg, #FF5722 0%, #FF6B35 100%);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <div class="logo">
+                <div class="logo-icon"></div>
+                <h1>Wedding Mantra</h1>
+            </div>
+            <p class="tagline">✨ Your complete traditional Indian wedding planning companion ✨</p>
+            <div class="decorative-border">🪷 🌺 🪷 🌺 🪷</div>
+            
+            <!-- Data Controls -->
+            <div class="data-controls">
+                <button onclick="exportData()" class="btn btn-secondary">
+                    📥 Export Data
+                </button>
+                <label for="importFile" class="btn btn-secondary" style="cursor: pointer;">
+                    📤 Import Data
+                    <input type="file" id="importFile" accept=".json" style="display: none;" onchange="importData(this.files[0])">
+                </label>
+                <button onclick="window.print()" class="btn btn-secondary">
+                    🖨️ Print
+                </button>
+                <button onclick="clearAllData()" class="btn btn-danger">
+                    🗑️ Clear All Data
+                </button>
+            </div>
+        </header>
+
+        <!-- Stats Cards -->
+        <div class="stats-container">
+            <div class="stat-card">
+                <div class="stat-icon">👥</div>
+                <div class="stat-number" id="totalGuests">0</div>
+                <div class="stat-label">Total Guests</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">✅</div>
+                <div class="stat-number" id="confirmedGuests">0</div>
+                <div class="stat-label">Confirmed</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">🎊</div>
+                <div class="stat-number" id="totalCeremonies">0</div>
+                <div class="stat-label">Ceremonies</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">🛍️</div>
+                <div class="stat-number" id="totalVendors">0</div>
+                <div class="stat-label">Vendors</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">📋</div>
+                <div class="stat-number" id="totalTasks">0</div>
+                <div class="stat-label">Pending Tasks</div>
+            </div>
+        </div>
+
+        <!-- Navigation Tabs -->
+        <nav class="nav-tabs">
+            <button class="nav-tab active" onclick="showSection('ceremonies')">🎊 Ceremonies</button>
+            <button class="nav-tab" onclick="showSection('guests')">👥 Guests</button>
+            <button class="nav-tab" onclick="showSection('vendors')">🛍️ Vendors</button>
+            <button class="nav-tab" onclick="showSection('tasks')">📋 Tasks</button>
+            <button class="nav-tab" onclick="showSection('budget')">💰 Budget</button>
+        </nav>
+
+        <!-- Ceremonies Section -->
+        <div class="section active" id="ceremonies">
+            <div class="section-header">
+                <div>
+                    <h2 class="section-title">🎊 Ceremony & Event Planning</h2>
+                    <p class="section-subtitle">Plan and track all your wedding ceremonies</p>
+                </div>
+                <button class="btn-add" onclick="openModal('ceremony')">+ Add Ceremony</button>
+            </div>
+            
+            <div class="ceremony-grid" id="ceremonyGrid">
+                <!-- Ceremonies will be dynamically added here -->
+            </div>
+        </div>
+
+        <!-- Guests Section -->
+        <div class="section" id="guests">
+            <div class="section-header">
+                <div>
+                    <h2 class="section-title">👥 Guest Management</h2>
+                    <p class="section-subtitle">Manage your wedding guests and RSVPs</p>
+                </div>
+                <button class="btn-add" onclick="openModal('guest')">+ Add Guest</button>
+            </div>
+
+            <div class="guest-list" id="guestsList">
+                <!-- Guests will be dynamically added here -->
+            </div>
+        </div>
+
+        <!-- Vendors Section -->
+        <div class="section" id="vendors">
+            <div class="section-header">
+                <div>
+                    <h2 class="section-title">🛍️ Vendor Management</h2>
+                    <p class="section-subtitle">Track and manage all your wedding vendors</p>
+                </div>
+                <button class="btn-add" onclick="openModal('vendor')">+ Add Vendor</button>
+            </div>
+
+            <div class="vendor-grid" id="vendorGrid">
+                <!-- Vendors will be dynamically added here -->
+            </div>
+        </div>
+
+        <!-- Tasks Section -->
+        <div class="section" id="tasks">
+            <div class="section-header">
+                <div>
+                    <h2 class="section-title">📋 Task Management</h2>
+                    <p class="section-subtitle">Keep track of all your wedding planning tasks</p>
+                </div>
+                <button class="btn-add" onclick="openModal('task')">+ Add Task</button>
+            </div>
+
+            <div id="tasksList" style="margin-top: 30px;">
+                <!-- Tasks will be dynamically added here -->
+            </div>
+        </div>
+
+        <!-- Budget Section -->
+        <div class="section" id="budget">
+            <div class="budget-tracker">
+                <div class="section-header">
+                    <div>
+                        <h2 class="section-title">💰 Budget Tracker</h2>
+                        <p class="section-subtitle">Monitor your wedding expenses</p>
+                    </div>
+                    <button class="btn-add" onclick="openModal('budget')">Set Budget</button>
+                </div>
+
+                <div class="budget-overview">
+                    <div class="budget-item total">
+                        <div class="budget-label">Total Budget</div>
+                        <div class="budget-amount" id="totalBudget">₹0</div>
+                    </div>
+                    <div class="budget-item">
+                        <div class="budget-label">Spent So Far</div>
+                        <div class="budget-amount" id="spentBudget">₹0</div>
+                    </div>
+                    <div class="budget-item">
+                        <div class="budget-label">Remaining</div>
+                        <div class="budget-amount" id="remainingBudget">₹0</div>
+                    </div>
+                </div>
+
+                <div class="budget-progress">
+                    <h3 style="margin-bottom: 15px; color: var(--text-primary);">💸 Budget Utilization</h3>
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="progressFill">0%</div>
+                    </div>
+                </div>
+
+                <div style="margin-top: 30px;">
+                    <h3 style="margin-bottom: 15px; color: var(--text-primary);">📊 Budget Breakdown</h3>
+                    <div id="budgetBreakdown">
+                        <!-- Budget breakdown will be shown here -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal -->
+    <div class="modal" id="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title" id="modalTitle">Add New</h3>
+                <button class="close-modal" onclick="closeModal()">×</button>
+            </div>
+            <form id="modalForm" onsubmit="handleFormSubmit(event)">
+                <div id="modalBody">
+                    <!-- Dynamic content will be inserted here -->
+                </div>
+                <div class="form-actions">
+                    <button type="button" class="btn btn-secondary" onclick="closeModal()">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Save</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // Wedding Mantra - Main Application Logic
+        // Version 2.0.0 - Single File Edition
+
+        class WeddingPlanner {
+            constructor() {
+                this.data = {
+                    ceremonies: [],
+                    guests: [],
+                    vendors: [],
+                    tasks: [],
+                    budget: {
+                        total: 0,
+                        spent: 0
+                    }
+                };
+                this.currentEditId = null;
+                this.currentEditType = null;
+                this.init();
+            }
+
+            init() {
+                this.loadData();
+                this.renderAll();
+                this.updateStats();
+                this.setupAutoSave();
+                
+                if (this.isFirstTime()) {
+                    this.addSampleData();
+                }
+            }
+
+            isFirstTime() {
+                return this.data.ceremonies.length === 0 && 
+                       this.data.guests.length === 0 && 
+                       this.data.vendors.length === 0 &&
+                       this.data.tasks.length === 0;
+            }
+
+            setupAutoSave() {
+                setInterval(() => {
+                    this.saveData(false);
+                }, 30000);
+
+                window.addEventListener('beforeunload', () => {
+                    this.saveData(false);
+                });
+            }
+
+            loadData() {
+                try {
+                    const saved = localStorage.getItem('weddingMantraData');
+                    if (saved) {
+                        const parsed = JSON.parse(saved);
+                        this.data = {
+                            ceremonies: parsed.ceremonies || [],
+                            guests: parsed.guests || [],
+                            vendors: parsed.vendors || [],
+                            tasks: parsed.tasks || [],
+                            budget: parsed.budget || { total: 0, spent: 0 }
+                        };
+                    }
+                } catch (e) {
+                    console.error('Error loading data:', e);
+                    this.showNotification('Error loading data. Starting fresh.', 'error');
+                }
+            }
+
+            saveData(showIndicator = true) {
+                try {
+                    localStorage.setItem('weddingMantraData', JSON.stringify(this.data));
+                    if (showIndicator) {
+                        this.showSaveIndicator();
+                    }
+                } catch (e) {
+                    console.error('Error saving data:', e);
+                    this.showNotification('Error saving data. Storage may be full.', 'error');
+                }
+            }
+
+            showSaveIndicator() {
+                const existing = document.querySelector('.save-indicator');
+                if (existing) existing.remove();
+                
+                const indicator = document.createElement('div');
+                indicator.className = 'save-indicator';
+                indicator.innerHTML = '✅ Saved Successfully';
+                document.body.appendChild(indicator);
+                
+                setTimeout(() => {
+                    if (indicator.parentNode) {
+                        indicator.remove();
+                    }
+                }, 2000);
+            }
+
+            showNotification(message, type = 'info') {
+                const notification = document.createElement('div');
+                notification.className = `save-indicator ${type}`;
+                notification.textContent = message;
+                document.body.appendChild(notification);
+                
+                setTimeout(() => {
+                    if (notification.parentNode) {
+                        notification.remove();
+                    }
+                }, 3000);
+            }
+
+            addSampleData() {
+                this.data.ceremonies = [
+                    {
+                        id: this.generateId(),
+                        name: 'Mehendi Ceremony',
+                        type: 'mehendi',
+                        date: this.getDateAfterDays(60),
+                        time: '16:00',
+                        venue: 'Garden Lawn, Grand Palace Hotel',
+                        guests: 80,
+                        budget: 50000,
+                        checklist: [
+                            { text: 'Book mehendi artist', done: true },
+                            { text: 'Arrange seating for guests', done: false },
+                            { text: 'Order refreshments', done: false },
+                            { text: 'Prepare music playlist', done: false }
+                        ]
+                    }
+                ];
+
+                this.data.guests = [
+                    {
+                        id: this.generateId(),
+                        name: 'Sharma Family',
+                        members: 4,
+                        email: 'sharma@example.com',
+                        phone: '+91 98765 43210',
+                        status: 'confirmed',
+                        requirements: 'Vegetarian food only'
+                    }
+                ];
+
+                this.data.vendors = [
+                    {
+                        id: this.generateId(),
+                        name: 'Raj Photography',
+                        type: 'photographer',
+                        contact: 'Raj Kumar',
+                        phone: '+91 98765 00001',
+                        email: 'raj@photography.com',
+                        price: 150000,
+                        status: 'booked'
+                    }
+                ];
+
+                this.data.tasks = [
+                    {
+                        id: this.generateId(),
+                        title: 'Book Wedding Venue',
+                        description: 'Finalize and book the main wedding venue',
+                        dueDate: this.getDateAfterDays(15),
+                        priority: 'high',
+                        completed: false
+                    }
+                ];
+
+                this.data.budget = {
+                    total: 2500000,
+                    spent: 0
+                };
+
+                this.saveData();
+                this.renderAll();
+                this.updateStats();
+            }
+
+            getDateAfterDays(days) {
+                const date = new Date();
+                date.setDate(date.getDate() + days);
+                return date.toISOString().split('T')[0];
+            }
+
+            generateId() {
+                return `${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+            }
+
+            addCeremony(ceremony) {
+                ceremony.id = this.generateId();
+                ceremony.checklist = ceremony.checklist || [];
+                this.data.ceremonies.push(ceremony);
+                this.saveData();
+                this.renderCeremonies();
+                this.updateStats();
+            }
+
+            editCeremony(id, updatedCeremony) {
+                const index = this.data.ceremonies.findIndex(c => c.id === id);
+                if (index !== -1) {
+                    this.data.ceremonies[index] = { 
+                        ...this.data.ceremonies[index], 
+                        ...updatedCeremony,
+                        id: id
+                    };
+                    this.saveData();
+                    this.renderCeremonies();
+                    this.updateStats();
+                }
+            }
+
+            deleteCeremony(id) {
+                this.data.ceremonies = this.data.ceremonies.filter(c => c.id !== id);
+                this.saveData();
+                this.renderCeremonies();
+                this.updateStats();
+            }
+
+            toggleChecklistItem(ceremonyId, itemIndex) {
+                const ceremony = this.data.ceremonies.find(c => c.id === ceremonyId);
+                if (ceremony && ceremony.checklist && ceremony.checklist[itemIndex]) {
+                    ceremony.checklist[itemIndex].done = !ceremony.checklist[itemIndex].done;
+                    this.saveData();
+                }
+            }
+
+            addGuest(guest) {
+                guest.id = this.generateId();
+                this.data.guests.push(guest);
+                this.saveData();
+                this.renderGuests();
+                this.updateStats();
+            }
+
+            editGuest(id, updatedGuest) {
+                const index = this.data.guests.findIndex(g => g.id === id);
+                if (index !== -1) {
+                    this.data.guests[index] = { 
+                        ...this.data.guests[index], 
+                        ...updatedGuest,
+                        id: id
+                    };
+                    this.saveData();
+                    this.renderGuests();
+                    this.updateStats();
+                }
+            }
+
+            deleteGuest(id) {
+                this.data.guests = this.data.guests.filter(g => g.id !== id);
+                this.saveData();
+                this.renderGuests();
+                this.updateStats();
+            }
+
+            addVendor(vendor) {
+                vendor.id = this.generateId();
+                this.data.vendors.push(vendor);
+                this.saveData();
+                this.renderVendors();
+                this.updateStats();
+            }
+
+            editVendor(id, updatedVendor) {
+                const index = this.data.vendors.findIndex(v => v.id === id);
+                if (index !== -1) {
+                    this.data.vendors[index] = { 
+                        ...this.data.vendors[index], 
+                        ...updatedVendor,
+                        id: id
+                    };
+                    this.saveData();
+                    this.renderVendors();
+                    this.updateStats();
+                }
+            }
+
+            deleteVendor(id) {
+                this.data.vendors = this.data.vendors.filter(v => v.id !== id);
+                this.saveData();
+                this.renderVendors();
+                this.updateStats();
+            }
+
+            addTask(task) {
+                task.id = this.generateId();
+                task.completed = false;
+                this.data.tasks.push(task);
+                this.saveData();
+                this.renderTasks();
+                this.updateStats();
+            }
+
+            editTask(id, updatedTask) {
+                const index = this.data.tasks.findIndex(t => t.id === id);
+                if (index !== -1) {
+                    this.data.tasks[index] = { 
+                        ...this.data.tasks[index], 
+                        ...updatedTask,
+                        id: id
+                    };
+                    this.saveData();
+                    this.renderTasks();
+                    this.updateStats();
+                }
+            }
+
+            deleteTask(id) {
+                this.data.tasks = this.data.tasks.filter(t => t.id !== id);
+                this.saveData();
+                this.renderTasks();
+                this.updateStats();
+            }
+
+            toggleTask(id) {
+                const task = this.data.tasks.find(t => t.id === id);
+                if (task) {
+                    task.completed = !task.completed;
+                    this.saveData();
+                    this.renderTasks();
+                    this.updateStats();
+                }
+            }
+
+            updateBudget(budget) {
+                this.data.budget = budget;
+                this.saveData();
+                this.updateBudgetDisplay();
+            }
+
+            renderAll() {
+                this.renderCeremonies();
+                this.renderGuests();
+                this.renderVendors();
+                this.renderTasks();
+                this.updateBudgetDisplay();
+            }
+
+            renderCeremonies() {
+                const grid = document.getElementById('ceremonyGrid');
+                if (!grid) return;
+                
+                if (this.data.ceremonies.length === 0) {
+                    grid.innerHTML = `
+                        <div class="empty-state" style="grid-column: 1/-1;">
+                            <div class="empty-state-icon">🎊</div>
+                            <div class="empty-state-text">No ceremonies added yet</div>
+                            <button class="btn-add" onclick="openModal('ceremony')">Add Your First Ceremony</button>
+                        </div>
+                    `;
+                    return;
+                }
+
+                grid.innerHTML = this.data.ceremonies.map(ceremony => `
+                    <div class="ceremony-card">
+                        <div class="card-actions">
+                            <button class="btn-edit" onclick="editItem('ceremony', '${ceremony.id}')" title="Edit">✏️</button>
+                            <button class="btn-delete" onclick="deleteItem('ceremony', '${ceremony.id}')" title="Delete">🗑️</button>
+                        </div>
+                        <div class="ceremony-header ${ceremony.type}">
+                            <div class="guest-count">👥 ${ceremony.guests} guests</div>
+                            <div class="ceremony-name">${this.escapeHtml(ceremony.name)}</div>
+                            <div class="ceremony-type">${ceremony.type.charAt(0).toUpperCase() + ceremony.type.slice(1)}</div>
+                        </div>
+                        <div class="ceremony-body">
+                            <div class="ceremony-info">
+                                <div class="info-item">
+                                    <span>📅</span>
+                                    <span>${ceremony.date}</span>
+                                </div>
+                                <div class="info-item">
+                                    <span>⏰</span>
+                                    <span>${ceremony.time}</span>
+                                </div>
+                                <div class="info-item">
+                                    <span>📍</span>
+                                    <span>${this.escapeHtml(ceremony.venue)}</span>
+                                </div>
+                            </div>
+                            <div class="budget-info">
+                                <div class="budget-label">Budget:</div>
+                                <div class="budget-amount">₹${ceremony.budget.toLocaleString('en-IN')}</div>
+                            </div>
+                            ${ceremony.checklist && ceremony.checklist.length > 0 ? `
+                                <div class="checklist">
+                                    <div class="checklist-title">✨ Checklist</div>
+                                    ${ceremony.checklist.map((item, index) => `
+                                        <div class="checklist-item">
+                                            <input type="checkbox" 
+                                                id="check-${ceremony.id}-${index}" 
+                                                ${item.done ? 'checked' : ''}
+                                                onchange="planner.toggleChecklistItem('${ceremony.id}', ${index})">
+                                            <label for="check-${ceremony.id}-${index}">${this.escapeHtml(item.text)}</label>
+                                        </div>
+                                    `).join('')}
+                                </div>
+                            ` : ''}
+                        </div>
+                    </div>
+                `).join('');
+            }
+
+            renderGuests() {
+                const list = document.getElementById('guestsList');
+                if (!list) return;
+                
+                if (this.data.guests.length === 0) {
+                    list.innerHTML = `
+                        <div class="empty-state">
+                            <div class="empty-state-icon">👥</div>
+                            <div class="empty-state-text">No guests added yet</div>
+                            <button class="btn-add" onclick="openModal('guest')">Add Your First Guest</button>
+                        </div>
+                    `;
+                    return;
+                }
+
+                list.innerHTML = this.data.guests.map(guest => `
+                    <div class="guest-item">
+                        <div>
+                            <div class="guest-name">${this.escapeHtml(guest.name)}</div>
+                            <div class="guest-details">
+                                <span>👥 ${guest.members} members</span>
+                                ${guest.email ? `<span>📧 ${this.escapeHtml(guest.email)}</span>` : ''}
+                                ${guest.phone ? `<span>📱 ${this.escapeHtml(guest.phone)}</span>` : ''}
+                                ${guest.requirements ? `<span>📝 ${this.escapeHtml(guest.requirements)}</span>` : ''}
+                            </div>
+                        </div>
+                        <div class="guest-actions">
+                            <span class="guest-status status-${guest.status}">${guest.status.charAt(0).toUpperCase() + guest.status.slice(1)}</span>
+                            <button class="btn-edit" onclick="editItem('guest', '${guest.id}')" title="Edit">✏️</button>
+                            <button class="btn-delete" onclick="deleteItem('guest', '${guest.id}')" title="Delete">🗑️</button>
+                        </div>
+                    </div>
+                `).join('');
+            }
+
+            renderVendors() {
+                const grid = document.getElementById('vendorGrid');
+                if (!grid) return;
+                
+                if (this.data.vendors.length === 0) {
+                    grid.innerHTML = `
+                        <div class="empty-state" style="grid-column: 1/-1;">
+                            <div class="empty-state-icon">🛍️</div>
+                            <div class="empty-state-text">No vendors added yet</div>
+                            <button class="btn-add" onclick="openModal('vendor')">Add Your First Vendor</button>
+                        </div>
+                    `;
+                    return;
+                }
+
+                const vendorIcons = {
+                    photographer: '📸',
+                    videographer: '🎥',
+                    catering: '🍽️',
+                    decoration: '🌸',
+                    makeup: '💄',
+                    music: '🎵',
+                    transportation: '🚗',
+                    other: '📦'
+                };
+
+                grid.innerHTML = this.data.vendors.map(vendor => `
+                    <div class="vendor-card">
+                        <div class="card-actions">
+                            <button class="btn-edit" onclick="editItem('vendor', '${vendor.id}')" title="Edit">✏️</button>
+                            <button class="btn-delete" onclick="deleteItem('vendor', '${vendor.id}')" title="Delete">🗑️</button>
+                        </div>
+                        <div class="vendor-icon">${vendorIcons[vendor.type] || '📦'}</div>
+                        <div class="vendor-name">${this.escapeHtml(vendor.name)}</div>
+                        <div class="vendor-type">${vendor.type.charAt(0).toUpperCase() + vendor.type.slice(1)}</div>
+                        <div class="vendor-price">₹${vendor.price.toLocaleString('en-IN')}</div>
+                        <span class="vendor-status status-${vendor.status}">${vendor.status.charAt(0).toUpperCase() + vendor.status.slice(1)}</span>
+                    </div>
+                `).join('');
+            }
+
+            renderTasks() {
+                const list = document.getElementById('tasksList');
+                if (!list) return;
+                
+                if (!this.data.tasks || this.data.tasks.length === 0) {
+                    list.innerHTML = `
+                        <div class="empty-state">
+                            <div class="empty-state-icon">📋</div>
+                            <div class="empty-state-text">No tasks added yet</div>
+                            <button class="btn-add" onclick="openModal('task')">Add Your First Task</button>
+                        </div>
+                    `;
+                    return;
+                }
+
+                const sortedTasks = [...this.data.tasks].sort((a, b) => {
+                    if (a.completed !== b.completed) return a.completed ? 1 : -1;
+                    return new Date(a.dueDate) - new Date(b.dueDate);
+                });
+
+                list.innerHTML = sortedTasks.map(task => `
+                    <div class="task-item priority-${task.priority}" style="${task.completed ? 'opacity: 0.6;' : ''}">
+                        <div class="task-header">
+                            <div style="display: flex; align-items: center; gap: 10px;">
+                                <input type="checkbox" 
+                                    ${task.completed ? 'checked' : ''}
+                                    onchange="planner.toggleTask('${task.id}')"
+                                    style="width: 20px; height: 20px; cursor: pointer; accent-color: #FF6B35;">
+                                <span class="task-title" style="${task.completed ? 'text-decoration: line-through;' : ''}">${this.escapeHtml(task.title)}</span>
+                            </div>
+                            <div style="display: flex; gap: 10px; align-items: center;">
+                                <span class="task-priority priority-${task.priority}">${task.priority.charAt(0).toUpperCase() + task.priority.slice(1)}</span>
+                                <button class="btn-edit" onclick="editItem('task', '${task.id}')" title="Edit">✏️</button>
+                                <button class="btn-delete" onclick="deleteItem('task', '${task.id}')" title="Delete">🗑️</button>
+                            </div>
+                        </div>
+                        ${task.description ? `<div class="task-description">${this.escapeHtml(task.description)}</div>` : ''}
+                        <div class="task-due">📅 Due: ${new Date(task.dueDate).toLocaleDateString('en-IN')}</div>
+                    </div>
+                `).join('');
+            }
+
+            updateStats() {
+                const totalGuests = this.data.guests.reduce((sum, guest) => sum + (parseInt(guest.members) || 0), 0);
+                const confirmedGuests = this.data.guests
+                    .filter(g => g.status === 'confirmed')
+                    .reduce((sum, guest) => sum + (parseInt(guest.members) || 0), 0);
+                
+                const pendingTasks = this.data.tasks ? this.data.tasks.filter(t => !t.completed).length : 0;
+                
+                document.getElementById('totalGuests').textContent = totalGuests;
+                document.getElementById('confirmedGuests').textContent = confirmedGuests;
+                document.getElementById('totalCeremonies').textContent = this.data.ceremonies.length;
+                document.getElementById('totalVendors').textContent = this.data.vendors.length;
+                document.getElementById('totalTasks').textContent = pendingTasks;
+            }
+
+            updateBudgetDisplay() {
+                const totalBudget = parseInt(this.data.budget.total) || 0;
+                const spentBudget = this.calculateSpentBudget();
+                const remainingBudget = totalBudget - spentBudget;
+                const percentage = totalBudget > 0 ? Math.round((spentBudget / totalBudget) * 100) : 0;
+
+                document.getElementById('totalBudget').textContent = `₹${totalBudget.toLocaleString('en-IN')}`;
+                document.getElementById('spentBudget').textContent = `₹${spentBudget.toLocaleString('en-IN')}`;
+                document.getElementById('remainingBudget').textContent = `₹${remainingBudget.toLocaleString('en-IN')}`;
+                
+                const progressFill = document.getElementById('progressFill');
+                progressFill.style.width = `${Math.min(percentage, 100)}%`;
+                progressFill.textContent = `${percentage}%`;
+                
+                if (percentage > 100) {
+                    progressFill.style.background = 'linear-gradient(135deg, #f44336 0%, #e57373 100%)';
+                } else if (percentage > 80) {
+                    progressFill.style.background = 'linear-gradient(135deg, #ff9800 0%, #ffb74d 100%)';
+                } else {
+                    progressFill.style.background = 'var(--primary)';
+                }
+
+                const breakdown = document.getElementById('budgetBreakdown');
+                const ceremonyBudget = this.data.ceremonies.reduce((sum, c) => sum + (parseInt(c.budget) || 0), 0);
+                const vendorBudget = this.data.vendors
+                    .filter(v => v.status === 'booked')
+                    .reduce((sum, v) => sum + (parseInt(v.price) || 0), 0);
+                
+                breakdown.innerHTML = `
+                    <div style="display: grid; gap: 10px;">
+                        <div style="padding: 15px; background: #f9f9f9; border-radius: 10px; display: flex; justify-content: space-between; align-items: center;">
+                            <span>🎊 Ceremonies Budget:</span>
+                            <strong style="color: var(--text-primary); font-size: 1.1rem;">₹${ceremonyBudget.toLocaleString('en-IN')}</strong>
+                        </div>
+                        <div style="padding: 15px; background: #f9f9f9; border-radius: 10px; display: flex; justify-content: space-between; align-items: center;">
+                            <span>🛍️ Booked Vendors:</span>
+                            <strong style="color: var(--text-primary); font-size: 1.1rem;">₹${vendorBudget.toLocaleString('en-IN')}</strong>
+                        </div>
+                        <div style="padding: 15px; background: #FFF3E0; border-radius: 10px; display: flex; justify-content: space-between; align-items: center;">
+                            <span>💰 Total Committed:</span>
+                            <strong style="color: #E65100; font-size: 1.1rem;">₹${spentBudget.toLocaleString('en-IN')}</strong>
+                        </div>
+                    </div>
+                `;
+            }
+
+            calculateSpentBudget() {
+                const ceremonyBudget = this.data.ceremonies.reduce((sum, c) => sum + (parseInt(c.budget) || 0), 0);
+                const vendorBudget = this.data.vendors
+                    .filter(v => v.status === 'booked')
+                    .reduce((sum, v) => sum + (parseInt(v.price) || 0), 0);
+                return ceremonyBudget + vendorBudget;
+            }
+
+            escapeHtml(text) {
+                if (!text) return '';
+                const div = document.createElement('div');
+                div.textContent = text;
+                return div.innerHTML;
+            }
+        }
+
+        // Initialize the planner
+        let planner;
+        document.addEventListener('DOMContentLoaded', () => {
+            planner = new WeddingPlanner();
+        });
+
+        // Global functions
+        function showSection(sectionId) {
+            document.querySelectorAll('.section').forEach(section => {
+                section.classList.remove('active');
+            });
+            
+            const selectedSection = document.getElementById(sectionId);
+            if (selectedSection) {
+                selectedSection.classList.add('active');
+            }
+            
+            document.querySelectorAll('.nav-tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            
+            if (event && event.target) {
+                event.target.classList.add('active');
+            }
+        }
+
+        function openModal(type, editData = null) {
+            const modal = document.getElementById('modal');
+            const modalTitle = document.getElementById('modalTitle');
+            const modalBody = document.getElementById('modalBody');
+            
+            planner.currentEditType = type;
+            planner.currentEditId = editData ? editData.id : null;
+            
+            switch(type) {
+                case 'ceremony':
+                    modalTitle.textContent = editData ? 'Edit Ceremony' : 'Add New Ceremony';
+                    modalBody.innerHTML = getCeremonyForm(editData);
+                    break;
+                case 'guest':
+                    modalTitle.textContent = editData ? 'Edit Guest' : 'Add New Guest';
+                    modalBody.innerHTML = getGuestForm(editData);
+                    break;
+                case 'vendor':
+                    modalTitle.textContent = editData ? 'Edit Vendor' : 'Add New Vendor';
+                    modalBody.innerHTML = getVendorForm(editData);
+                    break;
+                case 'task':
+                    modalTitle.textContent = editData ? 'Edit Task' : 'Add New Task';
+                    modalBody.innerHTML = getTaskForm(editData);
+                    break;
+                case 'budget':
+                    modalTitle.textContent = 'Set Wedding Budget';
+                    modalBody.innerHTML = getBudgetForm();
+                    break;
+            }
+            
+            modal.classList.add('active');
+        }
+
+        function closeModal() {
+            const modal = document.getElementById('modal');
+            modal.classList.remove('active');
+            planner.currentEditId = null;
+            planner.currentEditType = null;
+        }
+
+        function editItem(type, id) {
+            let item;
+            switch(type) {
+                case 'ceremony':
+                    item = planner.data.ceremonies.find(c => c.id === id);
+                    break;
+                case 'guest':
+                    item = planner.data.guests.find(g => g.id === id);
+                    break;
+                case 'vendor':
+                    item = planner.data.vendors.find(v => v.id === id);
+                    break;
+                case 'task':
+                    item = planner.data.tasks.find(t => t.id === id);
+                    break;
+            }
+            
+            if (item) {
+                openModal(type, item);
+            }
+        }
+
+        function deleteItem(type, id) {
+            const confirmMessage = `Are you sure you want to delete this ${type}? This action cannot be undone.`;
+            
+            if (confirm(confirmMessage)) {
+                switch(type) {
+                    case 'ceremony':
+                        planner.deleteCeremony(id);
+                        break;
+                    case 'guest':
+                        planner.deleteGuest(id);
+                        break;
+                    case 'vendor':
+                        planner.deleteVendor(id);
+                        break;
+                    case 'task':
+                        planner.deleteTask(id);
+                        break;
+                }
+                planner.showNotification(`${type.charAt(0).toUpperCase() + type.slice(1)} deleted successfully!`, 'success');
+            }
+        }
+
+        function handleFormSubmit(event) {
+            event.preventDefault();
+            
+            const formData = new FormData(event.target);
+            const data = Object.fromEntries(formData);
+            
+            if (data.guests) data.guests = parseInt(data.guests) || 0;
+            if (data.budget) data.budget = parseInt(data.budget) || 0;
+            if (data.members) data.members = parseInt(data.members) || 0;
+            if (data.price) data.price = parseInt(data.price) || 0;
+            if (data.total) data.total = parseInt(data.total) || 0;
+            
+            if (planner.currentEditType === 'ceremony') {
+                const checklistItems = document.querySelectorAll('#checklistItems input');
+                data.checklist = Array.from(checklistItems)
+                    .map(input => ({
+                        text: input.value.trim(),
+                        done: false
+                    }))
+                    .filter(item => item.text);
+                
+                if (planner.currentEditId) {
+                    const existing = planner.data.ceremonies.find(c => c.id === planner.currentEditId);
+                    if (existing && existing.checklist) {
+                        data.checklist = data.checklist.map((item, index) => ({
+                            ...item,
+                            done: existing.checklist[index] ? existing.checklist[index].done : false
+                        }));
+                    }
+                }
+            }
+            
+            if (planner.currentEditId) {
+                switch(planner.currentEditType) {
+                    case 'ceremony':
+                        planner.editCeremony(planner.currentEditId, data);
+                        break;
+                    case 'guest':
+                        planner.editGuest(planner.currentEditId, data);
+                        break;
+                    case 'vendor':
+                        planner.editVendor(planner.currentEditId, data);
+                        break;
+                    case 'task':
+                        planner.editTask(planner.currentEditId, data);
+                        break;
+                }
+                planner.showNotification(`${planner.currentEditType.charAt(0).toUpperCase() + planner.currentEditType.slice(1)} updated successfully!`, 'success');
+            } else {
+                switch(planner.currentEditType) {
+                    case 'ceremony':
+                        planner.addCeremony(data);
+                        break;
+                    case 'guest':
+                        planner.addGuest(data);
+                        break;
+                    case 'vendor':
+                        planner.addVendor(data);
+                        break;
+                    case 'task':
+                        planner.addTask(data);
+                        break;
+                    case 'budget':
+                        planner.updateBudget(data);
+                        break;
+                }
+                planner.showNotification(`${planner.currentEditType.charAt(0).toUpperCase() + planner.currentEditType.slice(1)} added successfully!`, 'success');
+            }
+            
+            closeModal();
+        }
+
+        // Form Templates
+        function getCeremonyForm(data = {}) {
+            const today = new Date().toISOString().split('T')[0];
+            return `
+                <div class="form-group">
+                    <label>Ceremony Name *</label>
+                    <input type="text" name="name" required value="${data.name || ''}" 
+                           placeholder="e.g., Mehendi Ceremony" maxlength="50">
+                </div>
+                <div class="form-group">
+                    <label>Ceremony Type *</label>
+                    <select name="type" required>
+                        <option value="">Select Type</option>
+                        <option value="mehendi" ${data.type === 'mehendi' ? 'selected' : ''}>🎨 Mehendi</option>
+                        <option value="sangeet" ${data.type === 'sangeet' ? 'selected' : ''}>🎵 Sangeet</option>
+                        <option value="haldi" ${data.type === 'haldi' ? 'selected' : ''}>🌻 Haldi</option>
+                        <option value="wedding" ${data.type === 'wedding' ? 'selected' : ''}>💑 Wedding</option>
+                        <option value="reception" ${data.type === 'reception' ? 'selected' : ''}>🎉 Reception</option>
+                        <option value="other" ${data.type === 'other' ? 'selected' : ''}>✨ Other</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Date *</label>
+                    <input type="date" name="date" required value="${data.date || ''}" min="${today}">
+                </div>
+                <div class="form-group">
+                    <label>Time *</label>
+                    <input type="time" name="time" required value="${data.time || ''}">
+                </div>
+                <div class="form-group">
+                    <label>Venue *</label>
+                    <input type="text" name="venue" required value="${data.venue || ''}" 
+                           placeholder="e.g., Grand Palace Hotel" maxlength="100">
+                </div>
+                <div class="form-group">
+                    <label>Expected Guests *</label>
+                    <input type="number" name="guests" required value="${data.guests || ''}" 
+                           placeholder="e.g., 100" min="1" max="10000">
+                </div>
+                <div class="form-group">
+                    <label>Budget (₹) *</label>
+                    <input type="number" name="budget" required value="${data.budget || ''}" 
+                           placeholder="e.g., 50000" min="0" max="10000000">
+                </div>
+                <div class="form-group">
+                    <label>Checklist Items (one per line)</label>
+                    <div id="checklistItems">
+                        ${data.checklist && data.checklist.length > 0 
+                            ? data.checklist.map(item => `
+                                <input type="text" value="${item.text}" style="margin-bottom: 8px;" 
+                                       placeholder="Task item" maxlength="100">
+                            `).join('')
+                            : '<input type="text" style="margin-bottom: 8px;" placeholder="Task item" maxlength="100">'
+                        }
+                    </div>
+                    <button type="button" onclick="addChecklistInput()" class="btn btn-secondary" style="margin-top: 10px;">
+                        + Add Item
+                    </button>
+                </div>
+            `;
+        }
+
+        function getGuestForm(data = {}) {
+            return `
+                <div class="form-group">
+                    <label>Guest Name *</label>
+                    <input type="text" name="name" required value="${data.name || ''}" 
+                           placeholder="e.g., Sharma Family" maxlength="50">
+                </div>
+                <div class="form-group">
+                    <label>Number of Members *</label>
+                    <input type="number" name="members" required value="${data.members || ''}" 
+                           placeholder="e.g., 4" min="1" max="100">
+                </div>
+                <div class="form-group">
+                    <label>Email</label>
+                    <input type="email" name="email" value="${data.email || ''}" 
+                           placeholder="guest@example.com" maxlength="100">
+                </div>
+                <div class="form-group">
+                    <label>Phone</label>
+                    <input type="tel" name="phone" value="${data.phone || ''}" 
+                           placeholder="+91 98765 43210" maxlength="20">
+                </div>
+                <div class="form-group">
+                    <label>RSVP Status *</label>
+                    <select name="status" required>
+                        <option value="pending" ${data.status === 'pending' ? 'selected' : ''}>⏳ Pending</option>
+                        <option value="confirmed" ${data.status === 'confirmed' ? 'selected' : ''}>✅ Confirmed</option>
+                        <option value="declined" ${data.status === 'declined' ? 'selected' : ''}>❌ Declined</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Special Requirements</label>
+                    <textarea name="requirements" rows="3" 
+                              placeholder="e.g., Vegetarian food, Wheelchair access" 
+                              maxlength="200">${data.requirements || ''}</textarea>
+                </div>
+            `;
+        }
+
+        function getVendorForm(data = {}) {
+            return `
+                <div class="form-group">
+                    <label>Vendor Name *</label>
+                    <input type="text" name="name" required value="${data.name || ''}" 
+                           placeholder="e.g., Raj Photography" maxlength="50">
+                </div>
+                <div class="form-group">
+                    <label>Service Type *</label>
+                    <select name="type" required>
+                        <option value="">Select Service</option>
+                        <option value="photographer" ${data.type === 'photographer' ? 'selected' : ''}>📸 Photographer</option>
+                        <option value="videographer" ${data.type === 'videographer' ? 'selected' : ''}>🎥 Videographer</option>
+                        <option value="catering" ${data.type === 'catering' ? 'selected' : ''}>🍽️ Catering</option>
+                        <option value="decoration" ${data.type === 'decoration' ? 'selected' : ''}>🌸 Decoration</option>
+                        <option value="makeup" ${data.type === 'makeup' ? 'selected' : ''}>💄 Makeup Artist</option>
+                        <option value="music" ${data.type === 'music' ? 'selected' : ''}>🎵 DJ/Music</option>
+                        <option value="transportation" ${data.type === 'transportation' ? 'selected' : ''}>🚗 Transportation</option>
+                        <option value="other" ${data.type === 'other' ? 'selected' : ''}>📦 Other</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Contact Person</label>
+                    <input type="text" name="contact" value="${data.contact || ''}" 
+                           placeholder="Contact person name" maxlength="50">
+                </div>
+                <div class="form-group">
+                    <label>Phone *</label>
+                    <input type="tel" name="phone" required value="${data.phone || ''}" 
+                           placeholder="+91 98765 43210" maxlength="20">
+                </div>
+                <div class="form-group">
+                    <label>Email</label>
+                    <input type="email" name="email" value="${data.email || ''}" 
+                           placeholder="vendor@example.com" maxlength="100">
+                </div>
+                <div class="form-group">
+                    <label>Quote (₹) *</label>
+                    <input type="number" name="price" required value="${data.price || ''}" 
+                           placeholder="e.g., 150000" min="0" max="10000000">
+                </div>
+                <div class="form-group">
+                    <label>Status *</label>
+                    <select name="status" required>
+                        <option value="negotiating" ${data.status === 'negotiating' ? 'selected' : ''}>💬 Negotiating</option>
+                        <option value="booked" ${data.status === 'booked' ? 'selected' : ''}>✅ Booked</option>
+                        <option value="cancelled" ${data.status === 'cancelled' ? 'selected' : ''}>❌ Cancelled</option>
+                    </select>
+                </div>
+            `;
+        }
+
+        function getTaskForm(data = {}) {
+            const today = new Date().toISOString().split('T')[0];
+            return `
+                <div class="form-group">
+                    <label>Task Title *</label>
+                    <input type="text" name="title" required value="${data.title || ''}" 
+                           placeholder="e.g., Book Wedding Venue" maxlength="100">
+                </div>
+                <div class="form-group">
+                    <label>Description</label>
+                    <textarea name="description" rows="3" 
+                              placeholder="Task details..." 
+                              maxlength="500">${data.description || ''}</textarea>
+                </div>
+                <div class="form-group">
+                    <label>Due Date *</label>
+                    <input type="date" name="dueDate" required value="${data.dueDate || ''}" min="${today}">
+                </div>
+                <div class="form-group">
+                    <label>Priority *</label>
+                    <select name="priority" required>
+                        <option value="low" ${data.priority === 'low' ? 'selected' : ''}>🟢 Low</option>
+                        <option value="medium" ${data.priority === 'medium' ? 'selected' : ''}>🟡 Medium</option>
+                        <option value="high" ${data.priority === 'high' ? 'selected' : ''}>🔴 High</option>
+                    </select>
+                </div>
+            `;
+        }
+
+        function getBudgetForm() {
+            return `
+                <div class="form-group">
+                    <label>Total Wedding Budget (₹) *</label>
+                    <input type="number" name="total" required value="${planner.data.budget.total || ''}" 
+                           placeholder="e.g., 2500000" min="0" max="100000000">
+                </div>
+                <div style="background: #FFF3E0; padding: 15px; border-radius: 10px; margin-top: 15px;">
+                    <p style="color: #E65100; font-size: 0.9rem; margin: 0;">
+                        💡 <strong>Tip:</strong> The spent amount will be calculated automatically based on your ceremony budgets and booked vendor prices.
+                    </p>
+                </div>
+            `;
+        }
+
+        function addChecklistInput() {
+            const checklistDiv = document.getElementById('checklistItems');
+            const input = document.createElement('input');
+            input.type = 'text';
+            input.style.marginBottom = '8px';
+            input.placeholder = 'Task item';
+            input.maxLength = 100;
+            checklistDiv.appendChild(input);
+        }
+
+        function exportData() {
+            try {
+                const dataStr = JSON.stringify(planner.data, null, 2);
+                const dataBlob = new Blob([dataStr], {type: 'application/json'});
+                const url = URL.createObjectURL(dataBlob);
+                const link = document.createElement('a');
+                link.href = url;
+                link.download = `wedding-mantra-backup-${new Date().toISOString().split('T')[0]}.json`;
+                link.click();
+                URL.revokeObjectURL(url);
+                planner.showNotification('Data exported successfully!', 'success');
+            } catch (error) {
+                console.error('Export error:', error);
+                planner.showNotification('Error exporting data', 'error');
+            }
+        }
+
+        function importData(file) {
+            if (!file) return;
+            
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const data = JSON.parse(e.target.result);
+                    
+                    if (!data.ceremonies || !data.guests || !data.vendors) {
+                        throw new Error('Invalid data format');
+                    }
+                    
+                    if (confirm('This will replace all existing data. Are you sure you want to continue?')) {
+                        planner.data = data;
+                        planner.saveData();
+                        planner.renderAll();
+                        planner.updateStats();
+                        planner.showNotification('Data imported successfully!', 'success');
+                    }
+                } catch (error) {
+                    console.error('Import error:', error);
+                    planner.showNotification('Error importing data. Please check the file format.', 'error');
+                }
+            };
+            reader.readAsText(file);
+            
+            document.getElementById('importFile').value = '';
+        }
+
+        function clearAllData() {
+            const confirmFirst = confirm('⚠️ Are you sure you want to clear all data? This action cannot be undone.');
+            
+            if (confirmFirst) {
+                const confirmSecond = confirm('🚨 This will delete ALL your wedding planning data permanently. Are you absolutely sure?');
+                
+                if (confirmSecond) {
+                    planner.data = {
+                        ceremonies: [],
+                        guests: [],
+                        vendors: [],
+                        tasks: [],
+                        budget: {
+                            total: 0,
+                            spent: 0
+                        }
+                    };
+                    planner.saveData();
+                    planner.renderAll();
+                    planner.updateStats();
+                    planner.showNotification('All data has been cleared', 'success');
+                }
+            }
+        }
+
+        window.addEventListener('click', (e) => {
+            const modal = document.getElementById('modal');
+            if (e.target === modal) {
+                closeModal();
+            }
+        });
+
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                closeModal();
+            }
+            
+            if ((e.ctrlKey || e.metaKey) && e.key === 's') {
+                e.preventDefault();
+                planner.saveData();
+            }
+        });
+
+        window.addEventListener('beforeunload', (e) => {
+            const modal = document.getElementById('modal');
+            if (modal && modal.classList.contains('active')) {
+                e.preventDefault();
+                e.returnValue = '';
+            }
+        });
+
+        console.log('💑 Wedding Mantra initialized successfully!');
+        console.log('✨ May your wedding planning be smooth and joyful!');
+    </script>
+</body>
+</html>

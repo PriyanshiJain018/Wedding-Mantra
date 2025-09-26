@@ -3,7 +3,30 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>Wedding Mantra - Your Dream Wedding Planner</title>
+    <title>
+        Wedding Mantra - Your Dream Wedding Planner
+        <!-- Firebase SDK -->
+        <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+        <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+
+        <script>
+        // Your Firebase configuration (paste the config you copied)
+        const firebaseConfig = {
+            apiKey: "AIzaSyCwZnuOXrIX-O_LuyundWUL-6nIAMVY7_o",
+            authDomain: "wedding-mantra-d7a2c.firebaseapp.com",
+            databaseURL: "https://wedding-mantra-d7a2c-default-rtdb.asia-southeast1.firebasedatabase.app",
+            projectId: "wedding-mantra-d7a2c",
+            storageBucket: "wedding-mantra-d7a2c.firebasestorage.app",
+            messagingSenderId: "573809650623",
+            appId: "1:573809650623:web:942e73b58557757d844f0a",
+            measurementId: "G-528WDJV0RG"
+        };
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+        const database = firebase.database();
+        const analytics = getAnalytics(app);
+        </script>
+    </title>
     <meta name="description" content="Plan your perfect Indian wedding with Wedding Mantra - manage ceremonies, guests, vendors, and budget all in one place">
     <meta name="theme-color" content="#FF6B35">
     
@@ -1422,6 +1445,115 @@
         ::-webkit-scrollbar-thumb:hover {
             background: linear-gradient(135deg, #FF5722 0%, #FF6B35 100%);
         }
+        
+        .room-selection {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 10000;
+        }
+
+        .room-selection.hidden {
+            display: none;
+        }
+
+        .room-card {
+            background: white;
+            padding: 40px;
+            border-radius: 25px;
+            max-width: 400px;
+            width: 90%;
+            text-align: center;
+            animation: slideInUp 0.3s ease;
+        }
+
+        .room-options {
+            margin-top: 30px;
+        }
+
+        .divider {
+            margin: 20px 0;
+            color: #999;
+            font-weight: 600;
+        }
+
+        .join-room {
+            display: flex;
+            gap: 10px;
+            flex-direction: column;
+        }
+
+        .join-room input {
+            padding: 12px;
+            border: 2px solid #E0E0E0;
+            border-radius: 12px;
+            font-size: 1.1rem;
+            text-align: center;
+            letter-spacing: 2px;
+            font-weight: 600;
+        }
+
+        .room-info {
+            background: linear-gradient(135deg, #4CAF50 0%, #66BB6A 100%);
+            color: white;
+            padding: 10px 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .room-info strong {
+            font-size: 1.2rem;
+            letter-spacing: 2px;
+        }
+
+        .btn-small {
+            padding: 5px 15px;
+            border: none;
+            border-radius: 15px;
+            background: rgba(255,255,255,0.3);
+            color: white;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .btn-small:hover {
+            background: rgba(255,255,255,0.5);
+        }
+
+        .btn-small.danger {
+            background: rgba(244, 67, 54, 0.5);
+        }
+
+        .btn-small.danger:hover {
+            background: rgba(244, 67, 54, 0.8);
+        }
+
+        .sync-indicator {
+            position: fixed;
+            bottom: 100px;
+            left: 20px;
+            background: #4CAF50;
+            color: white;
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            display: none;
+            animation: pulse 1s infinite;
+        }
+
+        .sync-indicator.active {
+            display: block;
+        }
     </style>
 </head>
 <body>
@@ -1434,6 +1566,36 @@
             </div>
             <p class="tagline">✨ Your complete traditional Indian wedding planning companion ✨</p>
             <div class="decorative-border">🪷 🌺 🪷 🌺 🪷</div>
+            <!-- Room Selection -->
+            <div id="roomSelection" class="room-selection">
+                <div class="room-card">
+                    <h2>👰 Join a Wedding Room</h2>
+                    <p>Create a new room or join an existing one to collaborate</p>
+                    
+                    <div class="room-options">
+                        <button onclick="window.weddingApp.createNewRoom()" class="btn btn-primary">
+                            🎊 Create New Room
+                        </button>
+                        
+                        <div class="divider">OR</div>
+                        
+                        <div class="join-room">
+                            <input type="text" id="roomCodeInput" placeholder="Enter 6-digit room code" 
+                                maxlength="6" pattern="[0-9]{6}">
+                            <button onclick="window.weddingApp.joinRoom()" class="btn btn-secondary">
+                                🔗 Join Room
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Room Info Bar (hidden initially) -->
+            <div id="roomInfo" class="room-info" style="display: none;">
+                <span>🏠 Room Code: <strong id="currentRoomCode"></strong></span>
+                <button onclick="window.weddingApp.copyRoomCode()" class="btn-small">📋 Copy</button>
+                <button onclick="window.weddingApp.leaveRoom()" class="btn-small danger">🚪 Leave</button>
+            </div>
             
             <!-- Data Controls -->
             <div class="data-controls">
@@ -1679,6 +1841,7 @@
 
     <script>
         // Wedding Mantra App - Enhanced Version
+        // Wedding Mantra App - Collaboration Version
         class WeddingMantraApp {
             constructor() {
                 this.data = {
@@ -1701,24 +1864,230 @@
                 this.currentSection = 'ceremonies';
                 this.searchQuery = '';
                 this.filters = {};
+                
+                // Collaboration properties
+                this.currentRoom = null;
+                this.roomRef = null;
+                this.isConnected = false;
+                
                 this.init();
             }
 
             init() {
-                this.loadData();
-                this.renderAll();
+                // Check if user has a saved room
+                const savedRoom = localStorage.getItem('weddingMantraRoom');
+                if (savedRoom) {
+                    this.autoJoinRoom(savedRoom);
+                } else {
+                    // Show room selection
+                    document.getElementById('roomSelection').classList.remove('hidden');
+                }
+                
                 this.updateStats();
                 this.setupAutoSave();
                 this.setupServiceWorker();
                 this.checkReminders();
                 this.setupReminderInterval();
+            }
+
+            // ========== COLLABORATION METHODS ==========
+            
+            createNewRoom() {
+                // Generate a 6-digit room code
+                const roomCode = Math.floor(100000 + Math.random() * 900000).toString();
+                this.joinRoomWithCode(roomCode);
+            }
+
+            joinRoom() {
+                const input = document.getElementById('roomCodeInput');
+                const roomCode = input.value.trim();
                 
-                if (this.isFirstTime()) {
-                    this.addSampleData();
+                if (roomCode.length !== 6 || !/^\d+$/.test(roomCode)) {
+                    this.showNotification('Please enter a valid 6-digit room code', 'error');
+                    return;
+                }
+                
+                this.joinRoomWithCode(roomCode);
+            }
+
+            autoJoinRoom(roomCode) {
+                // Try to auto-join the saved room
+                this.joinRoomWithCode(roomCode, true);
+            }
+
+            joinRoomWithCode(roomCode, isAuto = false) {
+                this.currentRoom = roomCode;
+                this.roomRef = database.ref('rooms/' + roomCode);
+                
+                // Show loading indicator
+                if (!isAuto) {
+                    this.showNotification('Connecting to room...', 'info');
+                }
+                
+                // Set up real-time listeners
+                this.setupRealtimeSync();
+                
+                // Save room to localStorage
+                localStorage.setItem('weddingMantraRoom', roomCode);
+                
+                // Update UI
+                document.getElementById('roomSelection').classList.add('hidden');
+                document.getElementById('roomInfo').style.display = 'flex';
+                document.getElementById('currentRoomCode').textContent = roomCode;
+                
+                // Load initial data
+                this.roomRef.once('value').then((snapshot) => {
+                    const roomData = snapshot.val();
+                    if (roomData) {
+                        this.data = roomData;
+                        this.renderAll();
+                        this.updateStats();
+                        this.checkReminders();
+                        this.showNotification(`Connected to room ${roomCode}!`, 'success');
+                    } else if (!isAuto) {
+                        // New room created
+                        this.syncToFirebase();
+                        this.showNotification(`Room ${roomCode} created!`, 'success');
+                    }
+                    this.isConnected = true;
+                }).catch((error) => {
+                    console.error('Error joining room:', error);
+                    this.showNotification('Failed to connect to room', 'error');
+                    if (isAuto) {
+                        // If auto-join failed, show room selection
+                        localStorage.removeItem('weddingMantraRoom');
+                        document.getElementById('roomSelection').classList.remove('hidden');
+                    }
+                });
+            }
+
+            setupRealtimeSync() {
+                if (!this.roomRef) return;
+                
+                // Listen for changes
+                this.roomRef.on('value', (snapshot) => {
+                    if (!this.isConnected) return; // Skip first load
+                    
+                    const newData = snapshot.val();
+                    if (newData) {
+                        // Check if data actually changed
+                        const dataChanged = JSON.stringify(this.data) !== JSON.stringify(newData);
+                        
+                        if (dataChanged) {
+                            this.data = newData;
+                            this.renderAll();
+                            this.updateStats();
+                            this.checkReminders();
+                            this.showSyncIndicator();
+                        }
+                    }
+                });
+            }
+
+            syncToFirebase() {
+                if (!this.roomRef || !this.isConnected) return;
+                
+                this.roomRef.set(this.data).then(() => {
+                    this.showSyncIndicator();
+                }).catch((error) => {
+                    console.error('Sync error:', error);
+                    this.showNotification('Failed to sync data', 'error');
+                });
+            }
+
+            leaveRoom() {
+                if (confirm('Are you sure you want to leave this room? You can rejoin using the room code.')) {
+                    // Remove listeners
+                    if (this.roomRef) {
+                        this.roomRef.off();
+                    }
+                    
+                    // Clear room data
+                    this.currentRoom = null;
+                    this.roomRef = null;
+                    this.isConnected = false;
+                    localStorage.removeItem('weddingMantraRoom');
+                    
+                    // Reset to local storage
+                    this.data = {
+                        ceremonies: [],
+                        guests: [],
+                        vendors: [],
+                        tasks: [],
+                        budget: { total: 0, spent: 0 },
+                        reminders: [],
+                        settings: { notifications: false, reminderDays: 7 }
+                    };
+                    
+                    // Update UI
+                    document.getElementById('roomInfo').style.display = 'none';
+                    document.getElementById('roomSelection').classList.remove('hidden');
+                    document.getElementById('roomCodeInput').value = '';
+                    
+                    this.renderAll();
+                    this.updateStats();
+                    this.showNotification('Left the room', 'info');
                 }
             }
 
-            // Service Worker for Offline Support
+            copyRoomCode() {
+                const code = this.currentRoom;
+                const text = `Join my Wedding Mantra room: ${code}\n\nGo to the app and enter this code to collaborate!`;
+                
+                if (navigator.clipboard) {
+                    navigator.clipboard.writeText(text).then(() => {
+                        this.showNotification('Room code copied! Share it with your family.', 'success');
+                    });
+                } else {
+                    // Fallback for older browsers
+                    const textarea = document.createElement('textarea');
+                    textarea.value = text;
+                    document.body.appendChild(textarea);
+                    textarea.select();
+                    document.execCommand('copy');
+                    document.body.removeChild(textarea);
+                    this.showNotification('Room code copied!', 'success');
+                }
+            }
+
+            showSyncIndicator() {
+                const existing = document.querySelector('.sync-indicator');
+                if (existing) existing.remove();
+                
+                const indicator = document.createElement('div');
+                indicator.className = 'sync-indicator active';
+                indicator.innerHTML = '🔄 Synced';
+                document.body.appendChild(indicator);
+                
+                setTimeout(() => {
+                    if (indicator.parentNode) {
+                        indicator.remove();
+                    }
+                }, 2000);
+            }
+
+            // Override saveData to sync with Firebase
+            saveData(showIndicator = true) {
+                if (this.isConnected && this.roomRef) {
+                    // Save to Firebase
+                    this.syncToFirebase();
+                } else {
+                    // Save to localStorage (offline mode)
+                    try {
+                        localStorage.setItem('weddingMantraData', JSON.stringify(this.data));
+                        if (showIndicator) {
+                            this.showSaveIndicator();
+                        }
+                    } catch (e) {
+                        console.error('Error saving data:', e);
+                        this.showNotification('Error saving data. Storage may be full.', 'error');
+                    }
+                }
+            }
+
+            // ========== REST OF YOUR EXISTING METHODS ==========
+            // (Keep all your existing methods below this line - they remain the same)
+            
             setupServiceWorker() {
                 if ('serviceWorker' in navigator) {
                     const swCode = `
@@ -1750,18 +2119,16 @@
                 }
             }
 
-            // Reminder System
             setupReminderInterval() {
                 setInterval(() => {
                     this.checkReminders();
-                }, 60000); // Check every minute
+                }, 60000);
             }
 
             checkReminders() {
                 const reminders = [];
                 const today = new Date();
                 
-                // Check task due dates
                 this.data.tasks.forEach(task => {
                     if (!task.completed) {
                         const dueDate = new Date(task.dueDate);
@@ -1777,7 +2144,6 @@
                     }
                 });
                 
-                // Check ceremony dates
                 this.data.ceremonies.forEach(ceremony => {
                     const ceremonyDate = new Date(ceremony.date);
                     const daysUntil = Math.ceil((ceremonyDate - today) / (1000 * 60 * 60 * 24));
@@ -1791,7 +2157,6 @@
                     }
                 });
                 
-                // Check pending RSVPs
                 const pendingGuests = this.data.guests.filter(g => g.status === 'pending').length;
                 if (pendingGuests > 0) {
                     reminders.push({
@@ -1804,7 +2169,6 @@
                 this.data.reminders = reminders;
                 this.renderReminders();
                 
-                // Update badge
                 const badge = document.getElementById('reminderBadge');
                 if (reminders.length > 0) {
                     badge.classList.add('has-notifications');
@@ -1812,11 +2176,109 @@
                     badge.classList.remove('has-notifications');
                 }
                 
-                // Show browser notifications if enabled
                 if (this.data.settings.notifications && reminders.length > 0) {
                     this.showBrowserNotification(reminders[0]);
                 }
             }
+
+            // Add all your other existing methods here...
+            // (Copy all the remaining methods from your original class)
+            // Including: renderReminders, toggleReminders, enableNotifications, etc.
+            // I'm not repeating them all here to save space, but they all stay exactly the same
+
+            // ... (continue with all your existing methods)
+
+            renderTimeline() {
+                const timelineView = document.getElementById('timelineView');
+                if (!timelineView) return;
+                
+                const sortedCeremonies = [...this.data.ceremonies].sort((a, b) => 
+                    new Date(a.date) - new Date(b.date)
+                );
+                
+                if (sortedCeremonies.length === 0) {
+                    timelineView.innerHTML = `
+                        <div class="empty-state">
+                            <div class="empty-state-icon">📅</div>
+                            <div class="empty-state-text">No ceremonies scheduled yet</div>
+                            <button class="btn-add" onclick="window.weddingApp.openModal('ceremony')">Add Your First Ceremony</button>
+                        </div>
+                    `;
+                    return;
+                }
+                
+                timelineView.innerHTML = '<div class="timeline">' + sortedCeremonies.map((ceremony, index) => {
+                    const date = new Date(ceremony.date);
+                    const today = new Date();
+                    const daysUntil = Math.ceil((date - today) / (1000 * 60 * 60 * 24));
+                    const isPast = daysUntil < 0;
+                    
+                    return `
+                        <div class="timeline-item">
+                            <div class="timeline-dot"></div>
+                            <div class="timeline-content">
+                                <div class="timeline-date">${date.toLocaleDateString('en-IN', { 
+                                    weekday: 'long', 
+                                    year: 'numeric', 
+                                    month: 'long', 
+                                    day: 'numeric' 
+                                })}</div>
+                                <div class="timeline-title">${ceremony.name}</div>
+                                <div style="color: #666; font-size: 0.9rem;">
+                                    📍 ${ceremony.venue} | ⏰ ${ceremony.time} | 👥 ${ceremony.guests} guests
+                                </div>
+                                <div class="countdown ${isPast ? 'past' : ''}">
+                                    ${isPast ? '✅ Completed' : daysUntil === 0 ? '🎊 Today!' : `⏳ ${daysUntil} days to go`}
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                }).join('') + '</div>';
+                
+                timelineView.classList.add('active');
+            }
+
+         
+            generateId() {
+                return `${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+            }
+
+            escapeHtml(text) {
+                if (!text) return '';
+                const div = document.createElement('div');
+                div.textContent = text;
+                return div.innerHTML;
+            }
+
+            showNotification(message, type = 'info') {
+                const notification = document.createElement('div');
+                notification.className = `save-indicator ${type}`;
+                notification.textContent = message;
+                document.body.appendChild(notification);
+                
+                setTimeout(() => {
+                    if (notification.parentNode) {
+                        notification.remove();
+                    }
+                }, 3000);
+            }
+
+            showSaveIndicator() {
+                const existing = document.querySelector('.save-indicator');
+                if (existing) existing.remove();
+                
+                const indicator = document.createElement('div');
+                indicator.className = 'save-indicator';
+                indicator.innerHTML = '✅ Saved Successfully';
+                document.body.appendChild(indicator);
+                
+                setTimeout(() => {
+                    if (indicator.parentNode) {
+                        indicator.remove();
+                    }
+                }, 2000);
+            }
+
 
             renderReminders() {
                 const reminderList = document.getElementById('reminderList');
@@ -3258,6 +3720,7 @@
                 setTimeout(() => shareNotice.remove(), 5000);
             }
         });
+
     </script>
 </body>
 </html>

@@ -1554,6 +1554,29 @@
         .sync-indicator.active {
             display: block;
         }
+        .connection-status {
+            position: fixed;
+            top: 10px;
+            right: 10px;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            z-index: 1000;
+        }
+
+        .connection-status.connected {
+            background: #E8F5E9;
+            color: #2E7D32;
+        }
+
+        .connection-status.disconnected {
+            background: #FFEBEE;
+            color: #C62828;
+        }
     </style>
 </head>
 <body>
@@ -1871,6 +1894,37 @@
                 this.isConnected = false;
                 
                 this.init();
+                // Add to the constructor
+                this.monitorConnection();
+            }
+
+            monitorConnection() {
+                if (typeof firebase !== 'undefined' && database) {
+                    const connectedRef = database.ref('.info/connected');
+                    connectedRef.on('value', (snapshot) => {
+                        const isOnline = snapshot.val();
+                        this.updateConnectionStatus(isOnline);
+                    });
+                }
+            }
+
+            updateConnectionStatus(isOnline) {
+                let statusEl = document.querySelector('.connection-status');
+                if (!statusEl && this.isConnected) {
+                    statusEl = document.createElement('div');
+                    statusEl.className = 'connection-status';
+                    document.body.appendChild(statusEl);
+                }
+                
+                if (statusEl) {
+                    if (isOnline) {
+                        statusEl.className = 'connection-status connected';
+                        statusEl.innerHTML = '🟢 Connected';
+                    } else {
+                        statusEl.className = 'connection-status disconnected';
+                        statusEl.innerHTML = '🔴 Offline';
+                    }
+                }
             }
 
             init() {
@@ -1914,7 +1968,6 @@
                 // Try to auto-join the saved room
                 this.joinRoomWithCode(roomCode, true);
             }
-
             joinRoomWithCode(roomCode, isAuto = false) {
                 this.currentRoom = roomCode;
                 this.roomRef = database.ref('rooms/' + roomCode);
@@ -1924,62 +1977,78 @@
                     this.showNotification('Connecting to room...', 'info');
                 }
                 
-                // Set up real-time listeners
-                this.setupRealtimeSync();
-                
-                // Save room to localStorage
-                localStorage.setItem('weddingMantraRoom', roomCode);
-                
-                // Update UI
+                // Update UI immediately
                 document.getElementById('roomSelection').classList.add('hidden');
                 document.getElementById('roomInfo').style.display = 'flex';
                 document.getElementById('currentRoomCode').textContent = roomCode;
                 
-                // Load initial data
+                // Save room to localStorage
+                localStorage.setItem('weddingMantraRoom', roomCode);
+                
+                // Load initial data first
                 this.roomRef.once('value').then((snapshot) => {
                     const roomData = snapshot.val();
                     if (roomData) {
                         this.data = roomData;
-                        this.renderAll();
-                        this.updateStats();
-                        this.checkReminders();
-                        this.showNotification(`Connected to room ${roomCode}!`, 'success');
                     } else if (!isAuto) {
-                        // New room created
-                        this.syncToFirebase();
-                        this.showNotification(`Room ${roomCode} created!`, 'success');
+                        // New room - sync current data
+                        this.roomRef.set(this.data);
                     }
+                    
+                    // Mark as connected
                     this.isConnected = true;
+                    
+                    // Set up real-time listeners AFTER initial load
+                    this.setupRealtimeSync();
+                    
+                    // Render everything
+                    this.renderAll();
+                    this.updateStats();
+                    this.checkReminders();
+                    
+                    if (!isAuto) {
+                        this.showNotification(`Connected to room ${roomCode}!`, 'success');
+                    }
                 }).catch((error) => {
                     console.error('Error joining room:', error);
                     this.showNotification('Failed to connect to room', 'error');
+                    this.isConnected = false;
+                    
                     if (isAuto) {
                         // If auto-join failed, show room selection
                         localStorage.removeItem('weddingMantraRoom');
                         document.getElementById('roomSelection').classList.remove('hidden');
+                        document.getElementById('roomInfo').style.display = 'none';
                     }
                 });
             }
-
+        
             setupRealtimeSync() {
                 if (!this.roomRef) return;
                 
+                // Keep track of local updates to avoid echo
+                this.localUpdate = false;
+                
                 // Listen for changes
                 this.roomRef.on('value', (snapshot) => {
-                    if (!this.isConnected) return; // Skip first load
+                    // Skip if this was a local update
+                    if (this.localUpdate) {
+                        this.localUpdate = false;
+                        return;
+                    }
                     
                     const newData = snapshot.val();
                     if (newData) {
-                        // Check if data actually changed
-                        const dataChanged = JSON.stringify(this.data) !== JSON.stringify(newData);
+                        // Update local data without triggering save
+                        this.data = newData;
                         
-                        if (dataChanged) {
-                            this.data = newData;
-                            this.renderAll();
-                            this.updateStats();
-                            this.checkReminders();
-                            this.showSyncIndicator();
-                        }
+                        // Re-render everything
+                        this.renderAll();
+                        this.updateStats();
+                        this.checkReminders();
+                        
+                        // Show sync indicator for remote updates
+                        this.showSyncIndicator();
                     }
                 });
             }
@@ -1987,14 +2056,38 @@
             syncToFirebase() {
                 if (!this.roomRef || !this.isConnected) return;
                 
+                // Set flag to avoid processing our own update
+                this.localUpdate = true;
+                
                 this.roomRef.set(this.data).then(() => {
                     this.showSyncIndicator();
                 }).catch((error) => {
                     console.error('Sync error:', error);
                     this.showNotification('Failed to sync data', 'error');
+                    // Reset flag on error
+                    this.localUpdate = false;
                 });
             }
 
+            // Override saveData to always sync when connected
+            saveData(showIndicator = true) {
+                if (this.isConnected && this.roomRef) {
+                    // Save to Firebase
+                    this.syncToFirebase();
+                } else {
+                    // Save to localStorage (offline mode)
+                    try {
+                        localStorage.setItem('weddingMantraData', JSON.stringify(this.data));
+                        if (showIndicator) {
+                            this.showSaveIndicator();
+                        }
+                    } catch (e) {
+                        console.error('Error saving data:', e);
+                        this.showNotification('Error saving data. Storage may be full.', 'error');
+                    }
+                }
+            }
+            
             leaveRoom() {
                 if (confirm('Are you sure you want to leave this room? You can rejoin using the room code.')) {
                     // Remove listeners
@@ -2066,24 +2159,6 @@
                 }, 2000);
             }
 
-            // Override saveData to sync with Firebase
-            saveData(showIndicator = true) {
-                if (this.isConnected && this.roomRef) {
-                    // Save to Firebase
-                    this.syncToFirebase();
-                } else {
-                    // Save to localStorage (offline mode)
-                    try {
-                        localStorage.setItem('weddingMantraData', JSON.stringify(this.data));
-                        if (showIndicator) {
-                            this.showSaveIndicator();
-                        }
-                    } catch (e) {
-                        console.error('Error saving data:', e);
-                        this.showNotification('Error saving data. Storage may be full.', 'error');
-                    }
-                }
-            }
 
             // ========== REST OF YOUR EXISTING METHODS ==========
             // (Keep all your existing methods below this line - they remain the same)

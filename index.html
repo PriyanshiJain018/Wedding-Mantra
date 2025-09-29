@@ -1988,14 +1988,24 @@
                 // Load initial data first
                 this.roomRef.once('value').then((snapshot) => {
                     const roomData = snapshot.val();
+                    
                     if (roomData) {
-                        this.data = roomData;
-                    } else if (!isAuto) {
-                        // New room - sync current data
+                        // Ensure data has all required properties
+                        this.data = {
+                            ceremonies: roomData.ceremonies || [],
+                            guests: roomData.guests || [],
+                            vendors: roomData.vendors || [],
+                            tasks: roomData.tasks || [],
+                            budget: roomData.budget || { total: 0, spent: 0 },
+                            reminders: roomData.reminders || [],
+                            settings: roomData.settings || { notifications: false, reminderDays: 7 }
+                        };
+                    } else {
+                        // New room - initialize with empty data and sync
                         this.roomRef.set(this.data);
                     }
                     
-                    // Mark as connected
+                    // Mark as connected BEFORE setting up listeners
                     this.isConnected = true;
                     
                     // Set up real-time listeners AFTER initial load
@@ -2015,59 +2025,74 @@
                     this.isConnected = false;
                     
                     if (isAuto) {
-                        // If auto-join failed, show room selection
                         localStorage.removeItem('weddingMantraRoom');
                         document.getElementById('roomSelection').classList.remove('hidden');
                         document.getElementById('roomInfo').style.display = 'none';
                     }
                 });
             }
-        
+
             setupRealtimeSync() {
                 if (!this.roomRef) return;
                 
-                // Keep track of local updates to avoid echo
-                this.localUpdate = false;
+                // Remove any existing listeners
+                this.roomRef.off('value');
                 
                 // Listen for changes
                 this.roomRef.on('value', (snapshot) => {
-                    // Skip if this was a local update
-                    if (this.localUpdate) {
-                        this.localUpdate = false;
-                        return;
-                    }
+                    // Skip the first trigger when setting up listener
+                    if (!this.isConnected) return;
                     
                     const newData = snapshot.val();
+                    
                     if (newData) {
-                        // Update local data without triggering save
-                        this.data = newData;
+                        // Store current data for comparison
+                        const oldDataStr = JSON.stringify(this.data);
                         
-                        // Re-render everything
-                        this.renderAll();
-                        this.updateStats();
-                        this.checkReminders();
+                        // Ensure proper data structure
+                        const updatedData = {
+                            ceremonies: newData.ceremonies || [],
+                            guests: newData.guests || [],
+                            vendors: newData.vendors || [],
+                            tasks: newData.tasks || [],
+                            budget: newData.budget || { total: 0, spent: 0 },
+                            reminders: newData.reminders || [],
+                            settings: newData.settings || { notifications: false, reminderDays: 7 }
+                        };
                         
-                        // Show sync indicator for remote updates
-                        this.showSyncIndicator();
+                        const newDataStr = JSON.stringify(updatedData);
+                        
+                        // Only update if data actually changed
+                        if (oldDataStr !== newDataStr) {
+                            this.data = updatedData;
+                            
+                            // Re-render everything
+                            this.renderAll();
+                            this.updateStats();
+                            this.checkReminders();
+                            
+                            // Show sync indicator
+                            this.showSyncIndicator();
+                        }
                     }
+                }, (error) => {
+                    console.error('Firebase sync error:', error);
                 });
             }
-
+        
             syncToFirebase() {
                 if (!this.roomRef || !this.isConnected) return;
                 
-                // Set flag to avoid processing our own update
-                this.localUpdate = true;
-                
-                this.roomRef.set(this.data).then(() => {
-                    this.showSyncIndicator();
+                // Use update instead of set to avoid overwriting other users' changes
+                this.roomRef.update(this.data).then(() => {
+                    console.log('Data synced to Firebase');
                 }).catch((error) => {
                     console.error('Sync error:', error);
                     this.showNotification('Failed to sync data', 'error');
-                    // Reset flag on error
-                    this.localUpdate = false;
                 });
             }
+
+
 
             // Override saveData to always sync when connected
             saveData(showIndicator = true) {
@@ -2204,54 +2229,65 @@
                 const reminders = [];
                 const today = new Date();
                 
-                this.data.tasks.forEach(task => {
-                    if (!task.completed) {
-                        const dueDate = new Date(task.dueDate);
-                        const daysUntil = Math.ceil((dueDate - today) / (1000 * 60 * 60 * 24));
-                        
-                        if (daysUntil <= 3 && daysUntil >= 0) {
-                            reminders.push({
-                                type: daysUntil === 0 ? 'urgent' : 'warning',
-                                title: 'Task Due Soon',
-                                message: `"${task.title}" is due ${daysUntil === 0 ? 'today' : 'in ' + daysUntil + ' days'}`
-                            });
+                // Check if arrays exist before using them
+                if (this.data.tasks && Array.isArray(this.data.tasks)) {
+                    this.data.tasks.forEach(task => {
+                        if (!task.completed && task.dueDate) {
+                            const dueDate = new Date(task.dueDate);
+                            const daysUntil = Math.ceil((dueDate - today) / (1000 * 60 * 60 * 24));
+                            
+                            if (daysUntil <= 3 && daysUntil >= 0) {
+                                reminders.push({
+                                    type: daysUntil === 0 ? 'urgent' : 'warning',
+                                    title: 'Task Due Soon',
+                                    message: `"${task.title}" is due ${daysUntil === 0 ? 'today' : 'in ' + daysUntil + ' days'}`
+                                });
+                            }
                         }
-                    }
-                });
+                    });
+                }
                 
-                this.data.ceremonies.forEach(ceremony => {
-                    const ceremonyDate = new Date(ceremony.date);
-                    const daysUntil = Math.ceil((ceremonyDate - today) / (1000 * 60 * 60 * 24));
-                    
-                    if (daysUntil <= 7 && daysUntil >= 0) {
+                if (this.data.ceremonies && Array.isArray(this.data.ceremonies)) {
+                    this.data.ceremonies.forEach(ceremony => {
+                        if (ceremony.date) {
+                            const ceremonyDate = new Date(ceremony.date);
+                            const daysUntil = Math.ceil((ceremonyDate - today) / (1000 * 60 * 60 * 24));
+                            
+                            if (daysUntil <= 7 && daysUntil >= 0) {
+                                reminders.push({
+                                    type: daysUntil <= 2 ? 'urgent' : 'info',
+                                    title: 'Ceremony Coming Up',
+                                    message: `${ceremony.name} is ${daysUntil === 0 ? 'today!' : 'in ' + daysUntil + ' days'}`
+                                });
+                            }
+                        }
+                    });
+                }
+                
+                if (this.data.guests && Array.isArray(this.data.guests)) {
+                    const pendingGuests = this.data.guests.filter(g => g.status === 'pending').length;
+                    if (pendingGuests > 0) {
                         reminders.push({
-                            type: daysUntil <= 2 ? 'urgent' : 'info',
-                            title: 'Ceremony Coming Up',
-                            message: `${ceremony.name} is ${daysUntil === 0 ? 'today!' : 'in ' + daysUntil + ' days'}`
+                            type: 'info',
+                            title: 'Pending RSVPs',
+                            message: `${pendingGuests} guests haven't responded yet`
                         });
                     }
-                });
-                
-                const pendingGuests = this.data.guests.filter(g => g.status === 'pending').length;
-                if (pendingGuests > 0) {
-                    reminders.push({
-                        type: 'info',
-                        title: 'Pending RSVPs',
-                        message: `${pendingGuests} guests haven't responded yet`
-                    });
                 }
                 
                 this.data.reminders = reminders;
                 this.renderReminders();
                 
                 const badge = document.getElementById('reminderBadge');
-                if (reminders.length > 0) {
-                    badge.classList.add('has-notifications');
-                } else {
-                    badge.classList.remove('has-notifications');
+                if (badge) {
+                    if (reminders.length > 0) {
+                        badge.classList.add('has-notifications');
+                    } else {
+                        badge.classList.remove('has-notifications');
+                    }
                 }
                 
-                if (this.data.settings.notifications && reminders.length > 0) {
+                if (this.data.settings && this.data.settings.notifications && reminders.length > 0) {
                     this.showBrowserNotification(reminders[0]);
                 }
             }

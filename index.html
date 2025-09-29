@@ -1867,37 +1867,37 @@
         // Wedding Mantra App - Collaboration Version
         class WeddingMantraApp {
             // 1. CONSTRUCTOR - Replace your existing constructor with this:
-            constructor() {
-                this.data = {
-                    ceremonies: [],
-                    guests: [],
-                    vendors: [],
-                    tasks: [],
-                    budget: {
-                        total: 0,
-                        spent: 0
-                    },
-                    reminders: [],
-                    settings: {
-                        notifications: false,
-                        reminderDays: 7
-                    }
-                };
-                this.currentEditId = null;
-                this.currentEditType = null;
-                this.currentSection = 'ceremonies';
-                this.searchQuery = '';
-                this.filters = {};
-                
-                // Collaboration properties
-                this.currentRoom = null;
-                this.roomRef = null;
-                this.isConnected = false;
-                this.localUpdateInProgress = false; // CRITICAL: Add this flag for sync
-                
-                this.init();
-                this.monitorConnection();
-            }
+          constructor() {
+            this.data = {
+                ceremonies: [],
+                guests: [],
+                vendors: [],
+                tasks: [],
+                budget: {
+                    total: 0,
+                    spent: 0
+                },
+                reminders: [],
+                settings: {
+                    notifications: false,
+                    reminderDays: 7
+                }
+            };
+            this.currentEditId = null;
+            this.currentEditType = null;
+            this.currentSection = 'ceremonies';
+            this.searchQuery = '';
+            this.filters = {};
+            
+            // Collaboration properties
+            this.currentRoom = null;
+            this.roomRef = null;
+            this.isConnected = false;
+            this.localUpdateInProgress = false; // CRITICAL FLAG
+            
+            this.init();
+            this.monitorConnection();
+        }
 
             monitorConnection() {
                 if (typeof firebase !== 'undefined' && database) {
@@ -1970,7 +1970,46 @@
                 this.joinRoomWithCode(roomCode, true);
             }
 
-            joinRoomWithCode(roomCode, isAuto = false) {
+            // 2. HELPER METHODS FOR ARRAY/OBJECT CONVERSION
+            firebaseToArray(firebaseObj) {
+                if (!firebaseObj) return [];
+                if (Array.isArray(firebaseObj)) return firebaseObj;
+                
+                // Convert Firebase object to array, maintaining order
+                const arr = [];
+                const keys = Object.keys(firebaseObj).sort((a, b) => {
+                    // Try to maintain numeric order if keys are numbers
+                    const numA = parseInt(a);
+                    const numB = parseInt(b);
+                    if (!isNaN(numA) && !isNaN(numB)) {
+                        return numA - numB;
+                    }
+                    return a.localeCompare(b);
+                });
+                
+                keys.forEach(key => {
+                    if (firebaseObj[key] && typeof firebaseObj[key] === 'object') {
+                        arr.push(firebaseObj[key]);
+                    }
+                });
+                return arr;
+            }
+
+            arrayToFirebase(arr) {
+                if (!arr || arr.length === 0) return {};
+                
+                // Convert array to Firebase-friendly object with numeric keys
+                const obj = {};
+                arr.forEach((item, index) => {
+                    if (item && typeof item === 'object') {
+                        obj[index] = item;
+                    }
+                });
+                return obj;
+            }
+
+
+           joinRoomWithCode(roomCode, isAuto = false) {
                 this.currentRoom = roomCode;
                 this.roomRef = database.ref('rooms/' + roomCode);
                 
@@ -1987,31 +2026,42 @@
                 // Save room to localStorage
                 localStorage.setItem('weddingMantraRoom', roomCode);
                 
-                // Set up real-time listeners FIRST (before loading initial data)
-                this.setupRealtimeSync();
-                
-                // Then load initial data
+                // Load initial data first, then setup listeners
                 this.roomRef.once('value').then((snapshot) => {
                     const roomData = snapshot.val();
                     
                     if (roomData) {
-                        // Room exists - load the data
+                        // Room exists - convert Firebase format to arrays
                         this.data = {
-                            ceremonies: roomData.ceremonies || [],
-                            guests: roomData.guests || [],
-                            vendors: roomData.vendors || [],
-                            tasks: roomData.tasks || [],
+                            ceremonies: this.firebaseToArray(roomData.ceremonies),
+                            guests: this.firebaseToArray(roomData.guests),
+                            vendors: this.firebaseToArray(roomData.vendors),
+                            tasks: this.firebaseToArray(roomData.tasks),
                             budget: roomData.budget || { total: 0, spent: 0 },
-                            reminders: roomData.reminders || [],
+                            reminders: this.firebaseToArray(roomData.reminders),
                             settings: roomData.settings || { notifications: false, reminderDays: 7 }
                         };
+                        console.log('Loaded existing room data:', this.data);
                     } else {
-                        // New room - initialize with empty data
-                        this.roomRef.set(this.data);
+                        // New room - initialize with empty structure
+                        console.log('Creating new room:', roomCode);
+                        const initialData = {
+                            ceremonies: {},
+                            guests: {},
+                            vendors: {},
+                            tasks: {},
+                            budget: { total: 0, spent: 0 },
+                            reminders: {},
+                            settings: { notifications: false, reminderDays: 7 }
+                        };
+                        this.roomRef.set(initialData);
                     }
                     
-                    // Mark as connected AFTER setting up listeners and loading data
+                    // Mark as connected
                     this.isConnected = true;
+                    
+                    // Set up real-time listeners AFTER loading initial data
+                    this.setupRealtimeSync();
                     
                     // Render everything
                     this.renderAll();
@@ -2034,119 +2084,163 @@
                 });
             }
 
-            // Replace setupRealtimeSync method:
+            // 4. SETUP REALTIME SYNC
             setupRealtimeSync() {
                 if (!this.roomRef) return;
                 
-                // Remove any existing listeners
+                console.log('Setting up realtime sync for room:', this.currentRoom);
+                
+                // Remove any existing listeners first
                 this.roomRef.off();
                 
-                // Listen for child changes instead of value changes for granular updates
-                
-                // Ceremonies
+                // Ceremonies listener
                 this.roomRef.child('ceremonies').on('value', (snapshot) => {
                     if (!this.localUpdateInProgress && this.isConnected) {
-                        const newCeremonies = snapshot.val() || [];
-                        this.data.ceremonies = newCeremonies;
-                        this.renderCeremonies();
-                        this.updateStats();
-                        this.checkReminders();
-                        this.showSyncIndicator();
+                        const newCeremonies = this.firebaseToArray(snapshot.val());
+                        const oldData = JSON.stringify(this.data.ceremonies);
+                        const newData = JSON.stringify(newCeremonies);
+                        
+                        if (oldData !== newData) {
+                            console.log('Ceremonies updated from Firebase');
+                            this.data.ceremonies = newCeremonies;
+                            this.renderCeremonies();
+                            this.updateStats();
+                            this.checkReminders();
+                            this.showSyncIndicator();
+                        }
                     }
                 });
                 
-                // Guests
+                // Guests listener
                 this.roomRef.child('guests').on('value', (snapshot) => {
                     if (!this.localUpdateInProgress && this.isConnected) {
-                        const newGuests = snapshot.val() || [];
-                        this.data.guests = newGuests;
-                        this.renderGuests();
-                        this.updateStats();
-                        this.showSyncIndicator();
+                        const newGuests = this.firebaseToArray(snapshot.val());
+                        const oldData = JSON.stringify(this.data.guests);
+                        const newData = JSON.stringify(newGuests);
+                        
+                        if (oldData !== newData) {
+                            console.log('Guests updated from Firebase');
+                            this.data.guests = newGuests;
+                            this.renderGuests();
+                            this.updateStats();
+                            this.showSyncIndicator();
+                        }
                     }
                 });
                 
-                // Vendors
+                // Vendors listener
                 this.roomRef.child('vendors').on('value', (snapshot) => {
                     if (!this.localUpdateInProgress && this.isConnected) {
-                        const newVendors = snapshot.val() || [];
-                        this.data.vendors = newVendors;
-                        this.renderVendors();
-                        this.updateStats();
-                        this.showSyncIndicator();
+                        const newVendors = this.firebaseToArray(snapshot.val());
+                        const oldData = JSON.stringify(this.data.vendors);
+                        const newData = JSON.stringify(newVendors);
+                        
+                        if (oldData !== newData) {
+                            console.log('Vendors updated from Firebase');
+                            this.data.vendors = newVendors;
+                            this.renderVendors();
+                            this.updateStats();
+                            this.showSyncIndicator();
+                        }
                     }
                 });
                 
-                // Tasks
+                // Tasks listener
                 this.roomRef.child('tasks').on('value', (snapshot) => {
                     if (!this.localUpdateInProgress && this.isConnected) {
-                        const newTasks = snapshot.val() || [];
-                        this.data.tasks = newTasks;
-                        this.renderTasks();
-                        this.updateStats();
-                        this.checkReminders();
-                        this.showSyncIndicator();
+                        const newTasks = this.firebaseToArray(snapshot.val());
+                        const oldData = JSON.stringify(this.data.tasks);
+                        const newData = JSON.stringify(newTasks);
+                        
+                        if (oldData !== newData) {
+                            console.log('Tasks updated from Firebase');
+                            this.data.tasks = newTasks;
+                            this.renderTasks();
+                            this.updateStats();
+                            this.checkReminders();
+                            this.showSyncIndicator();
+                        }
                     }
                 });
                 
-                // Budget
+                // Budget listener
                 this.roomRef.child('budget').on('value', (snapshot) => {
                     if (!this.localUpdateInProgress && this.isConnected) {
                         const newBudget = snapshot.val() || { total: 0, spent: 0 };
-                        this.data.budget = newBudget;
-                        this.updateBudgetDisplay();
-                        this.showSyncIndicator();
+                        const oldData = JSON.stringify(this.data.budget);
+                        const newData = JSON.stringify(newBudget);
+                        
+                        if (oldData !== newData) {
+                            console.log('Budget updated from Firebase');
+                            this.data.budget = newBudget;
+                            this.updateBudgetDisplay();
+                            this.showSyncIndicator();
+                        }
                     }
                 });
                 
-                // Settings
+                // Settings listener
                 this.roomRef.child('settings').on('value', (snapshot) => {
                     if (!this.localUpdateInProgress && this.isConnected) {
                         const newSettings = snapshot.val() || { notifications: false, reminderDays: 7 };
-                        this.data.settings = newSettings;
-                        this.showSyncIndicator();
+                        const oldData = JSON.stringify(this.data.settings);
+                        const newData = JSON.stringify(newSettings);
+                        
+                        if (oldData !== newData) {
+                            console.log('Settings updated from Firebase');
+                            this.data.settings = newSettings;
+                            this.showSyncIndicator();
+                        }
                     }
                 });
             }
     
+            // 5. SYNC TO FIREBASE
             syncToFirebase() {
                 if (!this.roomRef || !this.isConnected) return;
                 
-                // Set flag to prevent our own updates from triggering the listeners
+                console.log('Syncing to Firebase...');
+                
+                // Set flag to prevent feedback loop
                 this.localUpdateInProgress = true;
                 
-                // Update each part separately for better conflict resolution
-                const updates = {
-                    'ceremonies': this.data.ceremonies,
-                    'guests': this.data.guests,
-                    'vendors': this.data.vendors,
-                    'tasks': this.data.tasks,
-                    'budget': this.data.budget,
-                    'settings': this.data.settings
+                // Convert arrays to Firebase-friendly objects
+                const dataToSync = {
+                    'ceremonies': this.arrayToFirebase(this.data.ceremonies),
+                    'guests': this.arrayToFirebase(this.data.guests),
+                    'vendors': this.arrayToFirebase(this.data.vendors),
+                    'tasks': this.arrayToFirebase(this.data.tasks),
+                    'budget': this.data.budget || { total: 0, spent: 0 },
+                    'settings': this.data.settings || { notifications: false, reminderDays: 7 },
+                    'reminders': this.arrayToFirebase(this.data.reminders)
                 };
                 
-                this.roomRef.update(updates).then(() => {
-                    console.log('Data synced to Firebase');
-                    // Reset flag after a short delay to ensure Firebase has processed the update
+                console.log('Data being synced:', dataToSync);
+                
+                // Use set for complete data replacement
+                this.roomRef.set(dataToSync).then(() => {
+                    console.log('Data synced successfully to Firebase');
+                    // Reset flag after delay to ensure Firebase has processed
                     setTimeout(() => {
                         this.localUpdateInProgress = false;
-                    }, 100);
+                    }, 300);
                 }).catch((error) => {
-                    console.error('Sync error:', error);
+                    console.error('Firebase sync error:', error);
                     this.localUpdateInProgress = false;
-                    this.showNotification('Failed to sync data', 'error');
+                    this.showNotification('Failed to sync data: ' + error.message, 'error');
                 });
             }
 
-
-
-            // Override saveData to always sync when connected
+            // 6. SAVE DATA METHOD
             saveData(showIndicator = true) {
                 if (this.isConnected && this.roomRef) {
                     // When connected, sync to Firebase
                     this.syncToFirebase();
                     if (showIndicator) {
-                        this.showSyncIndicator();
+                        // Don't show save indicator, show sync indicator instead
+                        setTimeout(() => {
+                            this.showSyncIndicator();
+                        }, 300);
                     }
                 } else {
                     // When offline, save to localStorage
@@ -2161,7 +2255,29 @@
                     }
                 }
             }
-            
+
+            // 7. OPTIONAL: Debug helper to check sync status
+            debugFirebaseSync() {
+                console.group('🔍 Firebase Sync Debug');
+                console.log('Room Code:', this.currentRoom);
+                console.log('Is Connected:', this.isConnected);
+                console.log('Update in Progress:', this.localUpdateInProgress);
+                console.log('Local Data:', this.data);
+                
+                if (this.roomRef) {
+                    this.roomRef.once('value').then((snapshot) => {
+                        const firebaseData = snapshot.val();
+                        console.log('Firebase Raw Data:', firebaseData);
+                        console.log('Firebase Ceremonies Count:', Object.keys(firebaseData?.ceremonies || {}).length);
+                        console.log('Firebase Guests Count:', Object.keys(firebaseData?.guests || {}).length);
+                        console.log('Firebase Vendors Count:', Object.keys(firebaseData?.vendors || {}).length);
+                        console.log('Firebase Tasks Count:', Object.keys(firebaseData?.tasks || {}).length);
+                    });
+                } else {
+                    console.log('No room reference available');
+                }
+                console.groupEnd();
+            }
             leaveRoom() {
                 if (confirm('Are you sure you want to leave this room? You can rejoin using the room code.')) {
                     // Remove listeners

@@ -1866,6 +1866,7 @@
         // Wedding Mantra App - Enhanced Version
         // Wedding Mantra App - Collaboration Version
         class WeddingMantraApp {
+            // 1. CONSTRUCTOR - Replace your existing constructor with this:
             constructor() {
                 this.data = {
                     ceremonies: [],
@@ -1892,11 +1893,11 @@
                 this.currentRoom = null;
                 this.roomRef = null;
                 this.isConnected = false;
-                this.localUpdateInProgress = false; // ADD THIS LINE
+                this.localUpdateInProgress = false; // CRITICAL: Add this flag for sync
                 
                 this.init();
                 this.monitorConnection();
-}
+            }
 
             monitorConnection() {
                 if (typeof firebase !== 'undefined' && database) {
@@ -2009,7 +2010,7 @@
                         this.roomRef.set(this.data);
                     }
                     
-                    // Mark as connected
+                    // Mark as connected AFTER setting up listeners and loading data
                     this.isConnected = true;
                     
                     // Render everything
@@ -2032,6 +2033,7 @@
                     }
                 });
             }
+
             // Replace setupRealtimeSync method:
             setupRealtimeSync() {
                 if (!this.roomRef) return;
@@ -2039,8 +2041,7 @@
                 // Remove any existing listeners
                 this.roomRef.off();
                 
-                // Listen for child changes instead of value changes
-                // This gives us more granular updates
+                // Listen for child changes instead of value changes for granular updates
                 
                 // Ceremonies
                 this.roomRef.child('ceremonies').on('value', (snapshot) => {
@@ -2107,7 +2108,7 @@
                     }
                 });
             }
-
+    
             syncToFirebase() {
                 if (!this.roomRef || !this.isConnected) return;
                 

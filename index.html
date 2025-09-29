@@ -2191,56 +2191,81 @@
             }
     
             // 5. SYNC TO FIREBASE
+         // FOCUSED FIX - Replace ONLY the syncToFirebase method with this:
+
             syncToFirebase() {
                 if (!this.roomRef || !this.isConnected) return;
                 
-                console.log('Syncing to Firebase...', this.data);
+                console.log('Starting sync to Firebase...');
+                console.log('Current local data:', this.data);
                 
                 // Set flag to prevent feedback loop
                 this.localUpdateInProgress = true;
                 
-                // Create promises array for all updates
-                const promises = [];
+                // Prepare the complete data structure
+                const dataToSync = {};
                 
-                // Update each section individually
-                const ceremoniesData = this.arrayToFirebase(this.data.ceremonies);
-                if (ceremoniesData) {
-                    promises.push(this.roomRef.child('ceremonies').set(ceremoniesData));
-                } else {
-                    promises.push(this.roomRef.child('ceremonies').remove());
+                // Convert arrays to objects for Firebase
+                // Ceremonies
+                if (this.data.ceremonies && this.data.ceremonies.length > 0) {
+                    dataToSync.ceremonies = {};
+                    this.data.ceremonies.forEach((item, index) => {
+                        dataToSync.ceremonies[index] = item;
+                    });
                 }
                 
-                const guestsData = this.arrayToFirebase(this.data.guests);
-                if (guestsData) {
-                    promises.push(this.roomRef.child('guests').set(guestsData));
-                } else {
-                    promises.push(this.roomRef.child('guests').remove());
+                // Guests
+                if (this.data.guests && this.data.guests.length > 0) {
+                    dataToSync.guests = {};
+                    this.data.guests.forEach((item, index) => {
+                        dataToSync.guests[index] = item;
+                    });
                 }
                 
-                const vendorsData = this.arrayToFirebase(this.data.vendors);
-                if (vendorsData) {
-                    promises.push(this.roomRef.child('vendors').set(vendorsData));
-                } else {
-                    promises.push(this.roomRef.child('vendors').remove());
+                // Vendors
+                if (this.data.vendors && this.data.vendors.length > 0) {
+                    dataToSync.vendors = {};
+                    this.data.vendors.forEach((item, index) => {
+                        dataToSync.vendors[index] = item;
+                    });
                 }
                 
-                const tasksData = this.arrayToFirebase(this.data.tasks);
-                if (tasksData) {
-                    promises.push(this.roomRef.child('tasks').set(tasksData));
-                } else {
-                    promises.push(this.roomRef.child('tasks').remove());
+                // Tasks
+                if (this.data.tasks && this.data.tasks.length > 0) {
+                    dataToSync.tasks = {};
+                    this.data.tasks.forEach((item, index) => {
+                        dataToSync.tasks[index] = item;
+                    });
                 }
                 
-                // Always update budget and settings
-                promises.push(this.roomRef.child('budget').set(this.data.budget || { total: 0, spent: 0 }));
-                promises.push(this.roomRef.child('settings').set(this.data.settings || { notifications: false, reminderDays: 7 }));
+                // Always include budget and settings
+                dataToSync.budget = this.data.budget || { total: 0, spent: 0 };
+                dataToSync.settings = this.data.settings || { notifications: false, reminderDays: 7 };
                 
-                // Execute all updates
-                Promise.all(promises).then(() => {
-                    console.log('All data synced successfully to Firebase');
-                    // Verify what was saved
+                console.log('Data being sent to Firebase:', dataToSync);
+                
+                // Use update to merge with existing data
+                this.roomRef.update(dataToSync).then(() => {
+                    console.log('✅ Data synced successfully to Firebase');
+                    
+                    // Verify what was actually saved
                     this.roomRef.once('value').then(snapshot => {
-                        console.log('Verified Firebase data:', snapshot.val());
+                        const savedData = snapshot.val();
+                        console.log('✅ Verified Firebase data:', savedData);
+                        
+                        // Check each type
+                        if (savedData.guests) {
+                            console.log('✅ Guests in Firebase:', Object.keys(savedData.guests).length, 'items');
+                        }
+                        if (savedData.ceremonies) {
+                            console.log('✅ Ceremonies in Firebase:', Object.keys(savedData.ceremonies).length, 'items');
+                        }
+                        if (savedData.vendors) {
+                            console.log('✅ Vendors in Firebase:', Object.keys(savedData.vendors).length, 'items');
+                        }
+                        if (savedData.tasks) {
+                            console.log('✅ Tasks in Firebase:', Object.keys(savedData.tasks).length, 'items');
+                        }
                     });
                     
                     // Reset flag after delay
@@ -2248,10 +2273,19 @@
                         this.localUpdateInProgress = false;
                     }, 300);
                 }).catch((error) => {
-                    console.error('Firebase sync error:', error);
+                    console.error('❌ Firebase sync error:', error);
                     this.localUpdateInProgress = false;
                     this.showNotification('Failed to sync data: ' + error.message, 'error');
                 });
+            }
+
+            // ALSO ADD THIS TEST METHOD to verify sync is working:
+            testSyncNow() {
+                console.group('🔧 Manual Sync Test');
+                console.log('Current local data:', this.data);
+                console.log('Forcing sync...');
+                this.syncToFirebase();
+                console.groupEnd();
             }
             // 6. SAVE DATA METHOD
             saveData(showIndicator = true) {

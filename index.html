@@ -3621,10 +3621,12 @@
                                     <span>${this.escapeHtml(ceremony.venue)}</span>
                                 </div>
                             </div>
-                            <div class="budget-info">
-                                <div class="budget-label">Budget:</div>
-                                <div class="budget-amount">₹${ceremony.budget.toLocaleString('en-IN')}</div>
-                            </div>
+                            ${ceremony.budget && ceremony.budget > 0 ? `
+                                <div class="budget-info">
+                                    <div class="budget-label">Budget:</div>
+                                    <div class="budget-amount">₹${ceremony.budget.toLocaleString('en-IN')}</div>
+                                </div>
+                            ` : ''}
                             ${ceremony.checklist && ceremony.checklist.length > 0 ? `
                                 <div class="checklist">
                                     <div class="checklist-title">✨ Checklist</div>
@@ -3643,6 +3645,7 @@
                     </div>
                 `;
             }
+
 
             getGuestHTML(guest) {
                 return `
@@ -3859,10 +3862,16 @@
             }
 
             calculateSpentBudget() {
-                const ceremonyBudget = this.data.ceremonies.reduce((sum, c) => sum + (parseInt(c.budget) || 0), 0);
+                const ceremonyBudget = this.data.ceremonies.reduce((sum, c) => {
+                    // Only add to sum if budget exists and is greater than 0
+                    const budget = parseInt(c.budget) || 0;
+                    return sum + budget;
+                }, 0);
+                
                 const vendorBudget = this.data.vendors
                     .filter(v => v.status === 'booked')
                     .reduce((sum, v) => sum + (parseInt(v.price) || 0), 0);
+                
                 return ceremonyBudget + vendorBudget;
             }
 
@@ -3881,7 +3890,7 @@
                     <div class="form-group">
                         <label>Ceremony Name *</label>
                         <input type="text" name="name" required value="${escapeHtml(data.name || '')}" 
-                               placeholder="e.g., Mehendi Ceremony" maxlength="50">
+                            placeholder="e.g., Mehendi Ceremony" maxlength="50">
                     </div>
                     <div class="form-group">
                         <label>Ceremony Type *</label>
@@ -3906,17 +3915,17 @@
                     <div class="form-group">
                         <label>Venue *</label>
                         <input type="text" name="venue" required value="${escapeHtml(data.venue || '')}" 
-                               placeholder="e.g., Grand Palace Hotel" maxlength="100">
+                            placeholder="e.g., Grand Palace Hotel" maxlength="100">
                     </div>
                     <div class="form-group">
                         <label>Expected Guests *</label>
                         <input type="number" name="guests" required value="${data.guests || ''}" 
-                               placeholder="e.g., 100" min="1" max="10000">
+                            placeholder="e.g., 100" min="1" max="10000">
                     </div>
                     <div class="form-group">
-                        <label>Budget (₹) *</label>
-                        <input type="number" name="budget" required value="${data.budget || ''}" 
-                               placeholder="e.g., 50000" min="0" max="10000000">
+                        <label>Budget (₹) <small style="color: #999;">(Optional)</small></label>
+                        <input type="number" name="budget" value="${data.budget || ''}" 
+                            placeholder="Leave blank if not decided" min="0" max="10000000">
                     </div>
                     <div class="form-group">
                         <label>Checklist Items (one per line)</label>
@@ -3924,7 +3933,7 @@
                             ${data.checklist && data.checklist.length > 0 
                                 ? data.checklist.map(item => `
                                     <input type="text" value="${escapeHtml(item.text)}" style="margin-bottom: 8px;" 
-                                           placeholder="Task item" maxlength="100">
+                                        placeholder="Task item" maxlength="100">
                                 `).join('')
                                 : '<input type="text" style="margin-bottom: 8px;" placeholder="Task item" maxlength="100">'
                             }

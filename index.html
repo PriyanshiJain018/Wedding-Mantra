@@ -1972,36 +1972,31 @@
 
             // 2. HELPER METHODS FOR ARRAY/OBJECT CONVERSION
             firebaseToArray(firebaseObj) {
-                if (!firebaseObj) return [];
+                if (!firebaseObj || firebaseObj === null) return [];
                 if (Array.isArray(firebaseObj)) return firebaseObj;
                 
-                // Convert Firebase object to array, maintaining order
+                // Convert Firebase object to array
                 const arr = [];
-                const keys = Object.keys(firebaseObj).sort((a, b) => {
-                    // Try to maintain numeric order if keys are numbers
-                    const numA = parseInt(a);
-                    const numB = parseInt(b);
-                    if (!isNaN(numA) && !isNaN(numB)) {
-                        return numA - numB;
+                Object.keys(firebaseObj).forEach(key => {
+                    if (firebaseObj[key]) {
+                        arr[parseInt(key)] = firebaseObj[key];
                     }
-                    return a.localeCompare(b);
                 });
                 
-                keys.forEach(key => {
-                    if (firebaseObj[key] && typeof firebaseObj[key] === 'object') {
-                        arr.push(firebaseObj[key]);
-                    }
-                });
-                return arr;
+                // Remove any undefined elements
+                return arr.filter(item => item !== undefined);
             }
 
             arrayToFirebase(arr) {
-                if (!arr || arr.length === 0) return {};
+                // IMPORTANT: Return null for empty arrays, not empty object
+                if (!arr || !Array.isArray(arr) || arr.length === 0) {
+                    return null;  // Firebase will ignore null values
+                }
                 
                 // Convert array to Firebase-friendly object with numeric keys
                 const obj = {};
                 arr.forEach((item, index) => {
-                    if (item && typeof item === 'object') {
+                    if (item) {
                         obj[index] = item;
                     }
                 });
@@ -2199,28 +2194,56 @@
             syncToFirebase() {
                 if (!this.roomRef || !this.isConnected) return;
                 
-                console.log('Syncing to Firebase...');
+                console.log('Syncing to Firebase...', this.data);
                 
                 // Set flag to prevent feedback loop
                 this.localUpdateInProgress = true;
                 
-                // Convert arrays to Firebase-friendly objects
-                const dataToSync = {
-                    'ceremonies': this.arrayToFirebase(this.data.ceremonies),
-                    'guests': this.arrayToFirebase(this.data.guests),
-                    'vendors': this.arrayToFirebase(this.data.vendors),
-                    'tasks': this.arrayToFirebase(this.data.tasks),
-                    'budget': this.data.budget || { total: 0, spent: 0 },
-                    'settings': this.data.settings || { notifications: false, reminderDays: 7 },
-                    'reminders': this.arrayToFirebase(this.data.reminders)
-                };
+                // Create promises array for all updates
+                const promises = [];
                 
-                console.log('Data being synced:', dataToSync);
+                // Update each section individually
+                const ceremoniesData = this.arrayToFirebase(this.data.ceremonies);
+                if (ceremoniesData) {
+                    promises.push(this.roomRef.child('ceremonies').set(ceremoniesData));
+                } else {
+                    promises.push(this.roomRef.child('ceremonies').remove());
+                }
                 
-                // Use set for complete data replacement
-                this.roomRef.set(dataToSync).then(() => {
-                    console.log('Data synced successfully to Firebase');
-                    // Reset flag after delay to ensure Firebase has processed
+                const guestsData = this.arrayToFirebase(this.data.guests);
+                if (guestsData) {
+                    promises.push(this.roomRef.child('guests').set(guestsData));
+                } else {
+                    promises.push(this.roomRef.child('guests').remove());
+                }
+                
+                const vendorsData = this.arrayToFirebase(this.data.vendors);
+                if (vendorsData) {
+                    promises.push(this.roomRef.child('vendors').set(vendorsData));
+                } else {
+                    promises.push(this.roomRef.child('vendors').remove());
+                }
+                
+                const tasksData = this.arrayToFirebase(this.data.tasks);
+                if (tasksData) {
+                    promises.push(this.roomRef.child('tasks').set(tasksData));
+                } else {
+                    promises.push(this.roomRef.child('tasks').remove());
+                }
+                
+                // Always update budget and settings
+                promises.push(this.roomRef.child('budget').set(this.data.budget || { total: 0, spent: 0 }));
+                promises.push(this.roomRef.child('settings').set(this.data.settings || { notifications: false, reminderDays: 7 }));
+                
+                // Execute all updates
+                Promise.all(promises).then(() => {
+                    console.log('All data synced successfully to Firebase');
+                    // Verify what was saved
+                    this.roomRef.once('value').then(snapshot => {
+                        console.log('Verified Firebase data:', snapshot.val());
+                    });
+                    
+                    // Reset flag after delay
                     setTimeout(() => {
                         this.localUpdateInProgress = false;
                     }, 300);
@@ -2230,7 +2253,6 @@
                     this.showNotification('Failed to sync data: ' + error.message, 'error');
                 });
             }
-
             // 6. SAVE DATA METHOD
             saveData(showIndicator = true) {
                 if (this.isConnected && this.roomRef) {
@@ -3207,9 +3229,10 @@
                 ceremony.id = this.generateId();
                 ceremony.checklist = ceremony.checklist || [];
                 this.data.ceremonies.push(ceremony);
-                this.saveData();
+                this.saveData();  // This will trigger syncToFirebase
                 this.renderCeremonies();
                 this.updateStats();
+                console.log('Added ceremony, current ceremonies:', this.data.ceremonies);
             }
 
             editCeremony(id, updatedCeremony) {
@@ -3220,33 +3243,28 @@
                         ...updatedCeremony,
                         id: id
                     };
-                    this.saveData();
+                    this.saveData();  // This will trigger syncToFirebase
                     this.renderCeremonies();
                     this.updateStats();
+                    console.log('Edited ceremony, current ceremonies:', this.data.ceremonies);
                 }
             }
 
             deleteCeremony(id) {
                 this.data.ceremonies = this.data.ceremonies.filter(c => c.id !== id);
-                this.saveData();
+                this.saveData();  // This will trigger syncToFirebase
                 this.renderCeremonies();
                 this.updateStats();
-            }
-
-            toggleChecklistItem(ceremonyId, itemIndex) {
-                const ceremony = this.data.ceremonies.find(c => c.id === ceremonyId);
-                if (ceremony && ceremony.checklist && ceremony.checklist[itemIndex]) {
-                    ceremony.checklist[itemIndex].done = !ceremony.checklist[itemIndex].done;
-                    this.saveData();
-                }
+                console.log('Deleted ceremony, remaining ceremonies:', this.data.ceremonies);
             }
 
             addGuest(guest) {
                 guest.id = this.generateId();
                 this.data.guests.push(guest);
-                this.saveData();
+                this.saveData();  // This will trigger syncToFirebase
                 this.renderGuests();
                 this.updateStats();
+                console.log('Added guest, current guests:', this.data.guests);
             }
 
             editGuest(id, updatedGuest) {
@@ -3257,25 +3275,28 @@
                         ...updatedGuest,
                         id: id
                     };
-                    this.saveData();
+                    this.saveData();  // This will trigger syncToFirebase
                     this.renderGuests();
                     this.updateStats();
+                    console.log('Edited guest, current guests:', this.data.guests);
                 }
             }
 
             deleteGuest(id) {
                 this.data.guests = this.data.guests.filter(g => g.id !== id);
-                this.saveData();
+                this.saveData();  // This will trigger syncToFirebase
                 this.renderGuests();
                 this.updateStats();
+                console.log('Deleted guest, remaining guests:', this.data.guests);
             }
 
             addVendor(vendor) {
                 vendor.id = this.generateId();
                 this.data.vendors.push(vendor);
-                this.saveData();
+                this.saveData();  // This will trigger syncToFirebase
                 this.renderVendors();
                 this.updateStats();
+                console.log('Added vendor, current vendors:', this.data.vendors);
             }
 
             editVendor(id, updatedVendor) {
@@ -3286,26 +3307,29 @@
                         ...updatedVendor,
                         id: id
                     };
-                    this.saveData();
+                    this.saveData();  // This will trigger syncToFirebase
                     this.renderVendors();
                     this.updateStats();
+                    console.log('Edited vendor, current vendors:', this.data.vendors);
                 }
             }
 
             deleteVendor(id) {
                 this.data.vendors = this.data.vendors.filter(v => v.id !== id);
-                this.saveData();
+                this.saveData();  // This will trigger syncToFirebase
                 this.renderVendors();
                 this.updateStats();
+                console.log('Deleted vendor, remaining vendors:', this.data.vendors);
             }
 
             addTask(task) {
                 task.id = this.generateId();
                 task.completed = false;
                 this.data.tasks.push(task);
-                this.saveData();
+                this.saveData();  // This will trigger syncToFirebase
                 this.renderTasks();
                 this.updateStats();
+                console.log('Added task, current tasks:', this.data.tasks);
             }
 
             editTask(id, updatedTask) {
@@ -3316,26 +3340,38 @@
                         ...updatedTask,
                         id: id
                     };
-                    this.saveData();
+                    this.saveData();  // This will trigger syncToFirebase
                     this.renderTasks();
                     this.updateStats();
+                    console.log('Edited task, current tasks:', this.data.tasks);
                 }
             }
 
             deleteTask(id) {
                 this.data.tasks = this.data.tasks.filter(t => t.id !== id);
-                this.saveData();
+                this.saveData();  // This will trigger syncToFirebase
                 this.renderTasks();
                 this.updateStats();
+                console.log('Deleted task, remaining tasks:', this.data.tasks);
             }
 
             toggleTask(id) {
                 const task = this.data.tasks.find(t => t.id === id);
                 if (task) {
                     task.completed = !task.completed;
-                    this.saveData();
+                    this.saveData();  // This will trigger syncToFirebase
                     this.renderTasks();
                     this.updateStats();
+                    console.log('Toggled task, current tasks:', this.data.tasks);
+                }
+            }
+
+            toggleChecklistItem(ceremonyId, itemIndex) {
+                const ceremony = this.data.ceremonies.find(c => c.id === ceremonyId);
+                if (ceremony && ceremony.checklist && ceremony.checklist[itemIndex]) {
+                    ceremony.checklist[itemIndex].done = !ceremony.checklist[itemIndex].done;
+                    this.saveData();  // This will trigger syncToFirebase
+                    console.log('Toggled checklist item, current ceremonies:', this.data.ceremonies);
                 }
             }
 

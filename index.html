@@ -1892,11 +1892,11 @@
                 this.currentRoom = null;
                 this.roomRef = null;
                 this.isConnected = false;
+                this.localUpdateInProgress = false; // ADD THIS LINE
                 
                 this.init();
-                // Add to the constructor
                 this.monitorConnection();
-            }
+}
 
             monitorConnection() {
                 if (typeof firebase !== 'undefined' && database) {
@@ -1968,6 +1968,7 @@
                 // Try to auto-join the saved room
                 this.joinRoomWithCode(roomCode, true);
             }
+
             joinRoomWithCode(roomCode, isAuto = false) {
                 this.currentRoom = roomCode;
                 this.roomRef = database.ref('rooms/' + roomCode);
@@ -1985,12 +1986,15 @@
                 // Save room to localStorage
                 localStorage.setItem('weddingMantraRoom', roomCode);
                 
-                // Load initial data first
+                // Set up real-time listeners FIRST (before loading initial data)
+                this.setupRealtimeSync();
+                
+                // Then load initial data
                 this.roomRef.once('value').then((snapshot) => {
                     const roomData = snapshot.val();
                     
                     if (roomData) {
-                        // Ensure data has all required properties
+                        // Room exists - load the data
                         this.data = {
                             ceremonies: roomData.ceremonies || [],
                             guests: roomData.guests || [],
@@ -2001,15 +2005,12 @@
                             settings: roomData.settings || { notifications: false, reminderDays: 7 }
                         };
                     } else {
-                        // New room - initialize with empty data and sync
+                        // New room - initialize with empty data
                         this.roomRef.set(this.data);
                     }
                     
-                    // Mark as connected BEFORE setting up listeners
+                    // Mark as connected
                     this.isConnected = true;
-                    
-                    // Set up real-time listeners AFTER initial load
-                    this.setupRealtimeSync();
                     
                     // Render everything
                     this.renderAll();
@@ -2031,63 +2032,107 @@
                     }
                 });
             }
-
+            // Replace setupRealtimeSync method:
             setupRealtimeSync() {
                 if (!this.roomRef) return;
                 
                 // Remove any existing listeners
-                this.roomRef.off('value');
+                this.roomRef.off();
                 
-                // Listen for changes
-                this.roomRef.on('value', (snapshot) => {
-                    // Skip the first trigger when setting up listener
-                    if (!this.isConnected) return;
-                    
-                    const newData = snapshot.val();
-                    
-                    if (newData) {
-                        // Store current data for comparison
-                        const oldDataStr = JSON.stringify(this.data);
-                        
-                        // Ensure proper data structure
-                        const updatedData = {
-                            ceremonies: newData.ceremonies || [],
-                            guests: newData.guests || [],
-                            vendors: newData.vendors || [],
-                            tasks: newData.tasks || [],
-                            budget: newData.budget || { total: 0, spent: 0 },
-                            reminders: newData.reminders || [],
-                            settings: newData.settings || { notifications: false, reminderDays: 7 }
-                        };
-                        
-                        const newDataStr = JSON.stringify(updatedData);
-                        
-                        // Only update if data actually changed
-                        if (oldDataStr !== newDataStr) {
-                            this.data = updatedData;
-                            
-                            // Re-render everything
-                            this.renderAll();
-                            this.updateStats();
-                            this.checkReminders();
-                            
-                            // Show sync indicator
-                            this.showSyncIndicator();
-                        }
+                // Listen for child changes instead of value changes
+                // This gives us more granular updates
+                
+                // Ceremonies
+                this.roomRef.child('ceremonies').on('value', (snapshot) => {
+                    if (!this.localUpdateInProgress && this.isConnected) {
+                        const newCeremonies = snapshot.val() || [];
+                        this.data.ceremonies = newCeremonies;
+                        this.renderCeremonies();
+                        this.updateStats();
+                        this.checkReminders();
+                        this.showSyncIndicator();
                     }
-                }, (error) => {
-                    console.error('Firebase sync error:', error);
+                });
+                
+                // Guests
+                this.roomRef.child('guests').on('value', (snapshot) => {
+                    if (!this.localUpdateInProgress && this.isConnected) {
+                        const newGuests = snapshot.val() || [];
+                        this.data.guests = newGuests;
+                        this.renderGuests();
+                        this.updateStats();
+                        this.showSyncIndicator();
+                    }
+                });
+                
+                // Vendors
+                this.roomRef.child('vendors').on('value', (snapshot) => {
+                    if (!this.localUpdateInProgress && this.isConnected) {
+                        const newVendors = snapshot.val() || [];
+                        this.data.vendors = newVendors;
+                        this.renderVendors();
+                        this.updateStats();
+                        this.showSyncIndicator();
+                    }
+                });
+                
+                // Tasks
+                this.roomRef.child('tasks').on('value', (snapshot) => {
+                    if (!this.localUpdateInProgress && this.isConnected) {
+                        const newTasks = snapshot.val() || [];
+                        this.data.tasks = newTasks;
+                        this.renderTasks();
+                        this.updateStats();
+                        this.checkReminders();
+                        this.showSyncIndicator();
+                    }
+                });
+                
+                // Budget
+                this.roomRef.child('budget').on('value', (snapshot) => {
+                    if (!this.localUpdateInProgress && this.isConnected) {
+                        const newBudget = snapshot.val() || { total: 0, spent: 0 };
+                        this.data.budget = newBudget;
+                        this.updateBudgetDisplay();
+                        this.showSyncIndicator();
+                    }
+                });
+                
+                // Settings
+                this.roomRef.child('settings').on('value', (snapshot) => {
+                    if (!this.localUpdateInProgress && this.isConnected) {
+                        const newSettings = snapshot.val() || { notifications: false, reminderDays: 7 };
+                        this.data.settings = newSettings;
+                        this.showSyncIndicator();
+                    }
                 });
             }
-        
+
             syncToFirebase() {
                 if (!this.roomRef || !this.isConnected) return;
                 
-                // Use update instead of set to avoid overwriting other users' changes
-                this.roomRef.update(this.data).then(() => {
+                // Set flag to prevent our own updates from triggering the listeners
+                this.localUpdateInProgress = true;
+                
+                // Update each part separately for better conflict resolution
+                const updates = {
+                    'ceremonies': this.data.ceremonies,
+                    'guests': this.data.guests,
+                    'vendors': this.data.vendors,
+                    'tasks': this.data.tasks,
+                    'budget': this.data.budget,
+                    'settings': this.data.settings
+                };
+                
+                this.roomRef.update(updates).then(() => {
                     console.log('Data synced to Firebase');
+                    // Reset flag after a short delay to ensure Firebase has processed the update
+                    setTimeout(() => {
+                        this.localUpdateInProgress = false;
+                    }, 100);
                 }).catch((error) => {
                     console.error('Sync error:', error);
+                    this.localUpdateInProgress = false;
                     this.showNotification('Failed to sync data', 'error');
                 });
             }
@@ -2097,10 +2142,13 @@
             // Override saveData to always sync when connected
             saveData(showIndicator = true) {
                 if (this.isConnected && this.roomRef) {
-                    // Save to Firebase
+                    // When connected, sync to Firebase
                     this.syncToFirebase();
+                    if (showIndicator) {
+                        this.showSyncIndicator();
+                    }
                 } else {
-                    // Save to localStorage (offline mode)
+                    // When offline, save to localStorage
                     try {
                         localStorage.setItem('weddingMantraData', JSON.stringify(this.data));
                         if (showIndicator) {

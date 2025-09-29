@@ -3259,14 +3259,31 @@
             }
 
             // CRUD Operations
+            // REPLACE ALL THESE CRUD METHODS IN YOUR WeddingMantraApp CLASS
+            // These use direct Firebase sync that's proven to work
+
+            // ============ CEREMONIES CRUD ============
             addCeremony(ceremony) {
                 ceremony.id = this.generateId();
                 ceremony.checklist = ceremony.checklist || [];
                 this.data.ceremonies.push(ceremony);
-                this.saveData();  // This will trigger syncToFirebase
+                
+                // Direct Firebase sync
+                if (this.roomRef && this.isConnected) {
+                    const ceremoniesObj = {};
+                    this.data.ceremonies.forEach((c, idx) => {
+                        ceremoniesObj[idx] = c;
+                    });
+                    
+                    this.roomRef.child('ceremonies').set(ceremoniesObj).then(() => {
+                        console.log("✅ Ceremonies synced directly!");
+                    }).catch(err => {
+                        console.error("❌ Error syncing ceremonies:", err);
+                    });
+                }
+                
                 this.renderCeremonies();
                 this.updateStats();
-                console.log('Added ceremony, current ceremonies:', this.data.ceremonies);
             }
 
             editCeremony(id, updatedCeremony) {
@@ -3277,26 +3294,67 @@
                         ...updatedCeremony,
                         id: id
                     };
-                    this.saveData();  // This will trigger syncToFirebase
+                    
+                    // Direct Firebase sync
+                    if (this.roomRef && this.isConnected) {
+                        const ceremoniesObj = {};
+                        this.data.ceremonies.forEach((c, idx) => {
+                            ceremoniesObj[idx] = c;
+                        });
+                        
+                        this.roomRef.child('ceremonies').set(ceremoniesObj).then(() => {
+                            console.log("✅ Ceremonies updated directly!");
+                        });
+                    }
+                    
                     this.renderCeremonies();
                     this.updateStats();
-                    console.log('Edited ceremony, current ceremonies:', this.data.ceremonies);
                 }
             }
 
             deleteCeremony(id) {
                 this.data.ceremonies = this.data.ceremonies.filter(c => c.id !== id);
-                this.saveData();  // This will trigger syncToFirebase
+                
+                // Direct Firebase sync
+                if (this.roomRef && this.isConnected) {
+                    if (this.data.ceremonies.length > 0) {
+                        const ceremoniesObj = {};
+                        this.data.ceremonies.forEach((c, idx) => {
+                            ceremoniesObj[idx] = c;
+                        });
+                        this.roomRef.child('ceremonies').set(ceremoniesObj);
+                    } else {
+                        this.roomRef.child('ceremonies').remove();
+                    }
+                }
+                
                 this.renderCeremonies();
                 this.updateStats();
-                console.log('Deleted ceremony, remaining ceremonies:', this.data.ceremonies);
             }
 
-           addGuest(guest) {
+            toggleChecklistItem(ceremonyId, itemIndex) {
+                const ceremony = this.data.ceremonies.find(c => c.id === ceremonyId);
+                if (ceremony && ceremony.checklist && ceremony.checklist[itemIndex]) {
+                    ceremony.checklist[itemIndex].done = !ceremony.checklist[itemIndex].done;
+                    
+                    // Direct Firebase sync
+                    if (this.roomRef && this.isConnected) {
+                        const ceremoniesObj = {};
+                        this.data.ceremonies.forEach((c, idx) => {
+                            ceremoniesObj[idx] = c;
+                        });
+                        
+                        this.roomRef.child('ceremonies').set(ceremoniesObj);
+                    }
+                }
+            }
+
+            // ============ GUESTS CRUD ============
+            addGuest(guest) {
                 guest.id = this.generateId();
                 this.data.guests.push(guest);
                 
-                // Force immediate Firebase sync
+                // Direct Firebase sync
                 if (this.roomRef && this.isConnected) {
                     const guestsObj = {};
                     this.data.guests.forEach((g, idx) => {
@@ -3305,12 +3363,15 @@
                     
                     this.roomRef.child('guests').set(guestsObj).then(() => {
                         console.log("✅ Guests synced directly!");
+                    }).catch(err => {
+                        console.error("❌ Error syncing guests:", err);
                     });
                 }
                 
                 this.renderGuests();
                 this.updateStats();
             }
+
             editGuest(id, updatedGuest) {
                 const index = this.data.guests.findIndex(g => g.id === id);
                 if (index !== -1) {
@@ -3319,28 +3380,65 @@
                         ...updatedGuest,
                         id: id
                     };
-                    this.saveData();  // This will trigger syncToFirebase
+                    
+                    // Direct Firebase sync
+                    if (this.roomRef && this.isConnected) {
+                        const guestsObj = {};
+                        this.data.guests.forEach((g, idx) => {
+                            guestsObj[idx] = g;
+                        });
+                        
+                        this.roomRef.child('guests').set(guestsObj).then(() => {
+                            console.log("✅ Guests updated directly!");
+                        });
+                    }
+                    
                     this.renderGuests();
                     this.updateStats();
-                    console.log('Edited guest, current guests:', this.data.guests);
                 }
             }
 
             deleteGuest(id) {
                 this.data.guests = this.data.guests.filter(g => g.id !== id);
-                this.saveData();  // This will trigger syncToFirebase
+                
+                // Direct Firebase sync
+                if (this.roomRef && this.isConnected) {
+                    if (this.data.guests.length > 0) {
+                        const guestsObj = {};
+                        this.data.guests.forEach((g, idx) => {
+                            guestsObj[idx] = g;
+                        });
+                        this.roomRef.child('guests').set(guestsObj);
+                    } else {
+                        this.roomRef.child('guests').remove();
+                    }
+                }
+                
                 this.renderGuests();
                 this.updateStats();
-                console.log('Deleted guest, remaining guests:', this.data.guests);
             }
 
+            // ============ VENDORS CRUD ============
             addVendor(vendor) {
                 vendor.id = this.generateId();
                 this.data.vendors.push(vendor);
-                this.saveData();  // This will trigger syncToFirebase
+                
+                // Direct Firebase sync
+                if (this.roomRef && this.isConnected) {
+                    const vendorsObj = {};
+                    this.data.vendors.forEach((v, idx) => {
+                        vendorsObj[idx] = v;
+                    });
+                    
+                    this.roomRef.child('vendors').set(vendorsObj).then(() => {
+                        console.log("✅ Vendors synced directly!");
+                    }).catch(err => {
+                        console.error("❌ Error syncing vendors:", err);
+                    });
+                }
+                
                 this.renderVendors();
                 this.updateStats();
-                console.log('Added vendor, current vendors:', this.data.vendors);
             }
 
             editVendor(id, updatedVendor) {
@@ -3351,29 +3449,66 @@
                         ...updatedVendor,
                         id: id
                     };
-                    this.saveData();  // This will trigger syncToFirebase
+                    
+                    // Direct Firebase sync
+                    if (this.roomRef && this.isConnected) {
+                        const vendorsObj = {};
+                        this.data.vendors.forEach((v, idx) => {
+                            vendorsObj[idx] = v;
+                        });
+                        
+                        this.roomRef.child('vendors').set(vendorsObj).then(() => {
+                            console.log("✅ Vendors updated directly!");
+                        });
+                    }
+                    
                     this.renderVendors();
                     this.updateStats();
-                    console.log('Edited vendor, current vendors:', this.data.vendors);
                 }
             }
 
             deleteVendor(id) {
                 this.data.vendors = this.data.vendors.filter(v => v.id !== id);
-                this.saveData();  // This will trigger syncToFirebase
+                
+                // Direct Firebase sync
+                if (this.roomRef && this.isConnected) {
+                    if (this.data.vendors.length > 0) {
+                        const vendorsObj = {};
+                        this.data.vendors.forEach((v, idx) => {
+                            vendorsObj[idx] = v;
+                        });
+                        this.roomRef.child('vendors').set(vendorsObj);
+                    } else {
+                        this.roomRef.child('vendors').remove();
+                    }
+                }
+                
                 this.renderVendors();
                 this.updateStats();
-                console.log('Deleted vendor, remaining vendors:', this.data.vendors);
             }
 
+            // ============ TASKS CRUD ============
             addTask(task) {
                 task.id = this.generateId();
                 task.completed = false;
                 this.data.tasks.push(task);
-                this.saveData();  // This will trigger syncToFirebase
+                
+                // Direct Firebase sync
+                if (this.roomRef && this.isConnected) {
+                    const tasksObj = {};
+                    this.data.tasks.forEach((t, idx) => {
+                        tasksObj[idx] = t;
+                    });
+                    
+                    this.roomRef.child('tasks').set(tasksObj).then(() => {
+                        console.log("✅ Tasks synced directly!");
+                    }).catch(err => {
+                        console.error("❌ Error syncing tasks:", err);
+                    });
+                }
+                
                 this.renderTasks();
                 this.updateStats();
-                console.log('Added task, current tasks:', this.data.tasks);
             }
 
             editTask(id, updatedTask) {
@@ -3384,44 +3519,77 @@
                         ...updatedTask,
                         id: id
                     };
-                    this.saveData();  // This will trigger syncToFirebase
+                    
+                    // Direct Firebase sync
+                    if (this.roomRef && this.isConnected) {
+                        const tasksObj = {};
+                        this.data.tasks.forEach((t, idx) => {
+                            tasksObj[idx] = t;
+                        });
+                        
+                        this.roomRef.child('tasks').set(tasksObj).then(() => {
+                            console.log("✅ Tasks updated directly!");
+                        });
+                    }
+                    
                     this.renderTasks();
                     this.updateStats();
-                    console.log('Edited task, current tasks:', this.data.tasks);
                 }
             }
 
             deleteTask(id) {
                 this.data.tasks = this.data.tasks.filter(t => t.id !== id);
-                this.saveData();  // This will trigger syncToFirebase
+                
+                // Direct Firebase sync
+                if (this.roomRef && this.isConnected) {
+                    if (this.data.tasks.length > 0) {
+                        const tasksObj = {};
+                        this.data.tasks.forEach((t, idx) => {
+                            tasksObj[idx] = t;
+                        });
+                        this.roomRef.child('tasks').set(tasksObj);
+                    } else {
+                        this.roomRef.child('tasks').remove();
+                    }
+                }
+                
                 this.renderTasks();
                 this.updateStats();
-                console.log('Deleted task, remaining tasks:', this.data.tasks);
             }
 
             toggleTask(id) {
                 const task = this.data.tasks.find(t => t.id === id);
                 if (task) {
                     task.completed = !task.completed;
-                    this.saveData();  // This will trigger syncToFirebase
+                    
+                    // Direct Firebase sync
+                    if (this.roomRef && this.isConnected) {
+                        const tasksObj = {};
+                        this.data.tasks.forEach((t, idx) => {
+                            tasksObj[idx] = t;
+                        });
+                        
+                        this.roomRef.child('tasks').set(tasksObj).then(() => {
+                            console.log("✅ Task toggle synced!");
+                        });
+                    }
+                    
                     this.renderTasks();
                     this.updateStats();
-                    console.log('Toggled task, current tasks:', this.data.tasks);
                 }
             }
 
-            toggleChecklistItem(ceremonyId, itemIndex) {
-                const ceremony = this.data.ceremonies.find(c => c.id === ceremonyId);
-                if (ceremony && ceremony.checklist && ceremony.checklist[itemIndex]) {
-                    ceremony.checklist[itemIndex].done = !ceremony.checklist[itemIndex].done;
-                    this.saveData();  // This will trigger syncToFirebase
-                    console.log('Toggled checklist item, current ceremonies:', this.data.ceremonies);
-                }
-            }
-
+            // ============ BUDGET UPDATE ============
             updateBudget(budget) {
                 this.data.budget = budget;
-                this.saveData();
+                
+                // Direct Firebase sync
+                if (this.roomRef && this.isConnected) {
+                    this.roomRef.child('budget').set(budget).then(() => {
+                        console.log("✅ Budget synced directly!");
+                    });
+                }
+                
                 this.updateBudgetDisplay();
             }
 

@@ -3292,15 +3292,25 @@
                 console.log('Deleted ceremony, remaining ceremonies:', this.data.ceremonies);
             }
 
-            addGuest(guest) {
+           addGuest(guest) {
                 guest.id = this.generateId();
                 this.data.guests.push(guest);
-                this.saveData();  // This will trigger syncToFirebase
+                
+                // Force immediate Firebase sync
+                if (this.roomRef && this.isConnected) {
+                    const guestsObj = {};
+                    this.data.guests.forEach((g, idx) => {
+                        guestsObj[idx] = g;
+                    });
+                    
+                    this.roomRef.child('guests').set(guestsObj).then(() => {
+                        console.log("✅ Guests synced directly!");
+                    });
+                }
+                
                 this.renderGuests();
                 this.updateStats();
-                console.log('Added guest, current guests:', this.data.guests);
             }
-
             editGuest(id, updatedGuest) {
                 const index = this.data.guests.findIndex(g => g.id === id);
                 if (index !== -1) {

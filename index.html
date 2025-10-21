@@ -3497,8 +3497,20 @@
             }
 
             // ============ GUESTS CRUD ============
+
             addGuest(guest) {
                 guest.id = this.generateId();
+                
+                // Ensure guest has at least an empty invitations array
+                if (!guest.invitations) {
+                    guest.invitations = [];
+                }
+                
+                // For backward compatibility, set a default status if none exists
+                if (!guest.status && guest.invitations.length === 0) {
+                    guest.status = 'pending';
+                }
+                
                 this.data.guests.push(guest);
                 
                 // Direct Firebase sync
@@ -3797,8 +3809,20 @@
                 `;
             }
 
-
             getGuestHTML(guest) {
+                // Calculate overall status from invitations
+                let overallStatus = 'pending';
+                if (guest.invitations && guest.invitations.length > 0) {
+                    const hasConfirmed = guest.invitations.some(inv => inv.status === 'confirmed');
+                    const allDeclined = guest.invitations.every(inv => inv.status === 'declined');
+                    
+                    if (hasConfirmed) {
+                        overallStatus = 'confirmed';
+                    } else if (allDeclined) {
+                        overallStatus = 'declined';
+                    }
+                }
+                
                 return `
                     <div class="guest-item">
                         <div>
@@ -3809,15 +3833,26 @@
                                 ${guest.phone ? `<span>📱 ${this.escapeHtml(guest.phone)}</span>` : ''}
                                 ${guest.requirements ? `<span>📝 ${this.escapeHtml(guest.requirements)}</span>` : ''}
                             </div>
+                            ${guest.invitations && guest.invitations.length > 0 ? `
+                                <div style="margin-top: 8px; font-size: 0.85rem; color: #666;">
+                                    Invited to: ${guest.invitations.map(inv => {
+                                        const ceremony = this.data.ceremonies.find(c => c.id === inv.ceremonyId);
+                                        return ceremony ? `${ceremony.name} (${inv.status})` : '';
+                                    }).filter(Boolean).join(', ')}
+                                </div>
+                            ` : ''}
                         </div>
                         <div class="guest-actions">
-                            <span class="guest-status status-${guest.status}">${guest.status.charAt(0).toUpperCase() + guest.status.slice(1)}</span>
+                            <span class="guest-status status-${overallStatus}">${overallStatus.charAt(0).toUpperCase() + overallStatus.slice(1)}</span>
                             <button class="btn-edit" onclick="window.weddingApp.editItem('guest', '${guest.id}')" title="Edit">✏️</button>
                             <button class="btn-delete" onclick="window.weddingApp.deleteItem('guest', '${guest.id}')" title="Delete">🗑️</button>
                         </div>
                     </div>
                 `;
             }
+
+
+           
 
             getVendorHTML(vendor) {
                 const vendorIcons = {
